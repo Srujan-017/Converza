@@ -27,25 +27,25 @@ function HomeComponent() {
 
             <div className="navBar">
 
-                <div style={{ display: "flex", alignItems: "center" }}>
-
+                <div className="navBrand">
                     <h2>Converza</h2>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center" }}>
-                    <IconButton onClick={
-                        () => {
-                            navigate("/history")
-                        }
-                    }>
-                        <RestoreIcon />
-                    </IconButton>
-                    <p>History</p>
+                <div className="navActions">
+                    <div className="navHistoryLink" onClick={() => navigate("/history")}>
+                        <IconButton size="small" className="navHistoryIcon">
+                            <RestoreIcon fontSize="small" />
+                        </IconButton>
+                        <p>History</p>
+                    </div>
 
-                    <Button onClick={() => {
-                        localStorage.removeItem("token")
-                        navigate("/auth")
-                    }}>
+                    <Button
+                        className="navLogoutBtn"
+                        variant="outlined"
+                        onClick={() => {
+                            localStorage.removeItem("token")
+                            navigate("/auth")
+                        }}>
                         Logout
                     </Button>
                 </div>
@@ -57,12 +57,30 @@ function HomeComponent() {
             <div className="meetContainer">
                 <div className="leftPanel">
                     <div>
-                        <h2>Providing Quality Video Call Just Like Quality Education</h2>
+                        <p className="heroEyebrow">Welcome back</p>
+                        <h1>Providing quality video calls, just like quality education</h1>
+                        <p className="heroSubtitle">Enter a meeting code to jump into an existing call, or start a new one from your history.</p>
 
-                        <div style={{ display: 'flex', gap: "10px" }}>
+                        <div className="joinCard">
 
-                            <TextField onChange={e => setMeetingCode(e.target.value)} id="outlined-basic" label="Meeting Code" variant="outlined" />
-                            <Button onClick={handleJoinVideoCall} variant='contained'>Join</Button>
+                            <TextField
+                                className="meetingCodeField"
+                                onChange={e => setMeetingCode(e.target.value)}
+                                onKeyDown={e => { if (e.key === 'Enter') handleJoinVideoCall(); }}
+                                id="outlined-basic"
+                                label="Meeting code"
+                                placeholder="e.g. team-standup-42"
+                                variant="outlined"
+                                fullWidth
+                            />
+                            <Button
+                                className="joinCallBtn"
+                                onClick={handleJoinVideoCall}
+                                variant='contained'
+                                disabled={!meetingCode.trim()}
+                            >
+                                Join
+                            </Button>
 
                         </div>
                     </div>

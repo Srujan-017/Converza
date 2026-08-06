@@ -90,25 +90,142 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-inline: 20px;
-  text-align: center;
-
+  padding-inline: 32px;
+  padding-block: 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #ececec;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
+
+.navBrand h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #16233b;
+  letter-spacing: 0.01em;
+  margin: 0;
+}
+
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.navHistoryLink {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 4px 10px 4px 4px;
+  border-radius: 20px;
+  transition: background 0.15s ease;
+  color: #4a4a4a;
+}
+
+.navHistoryLink:hover {
+  background: #f4f1ea;
+}
+
+.navHistoryLink p {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.navHistoryIcon {
+  color: #4a4a4a !important;
+}
+
+.navLogoutBtn {
+  border-color: #D97500 !important;
+  color: #D97500 !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  padding-inline: 16px !important;
+}
+
+.navLogoutBtn:hover {
+  background: rgba(217, 117, 0, 0.08) !important;
+}
+
 .meetContainer {
   display: flex;
   padding-inline: 20px;
-  height: 80vh;
-  gap: 10vw;
+  min-height: 80vh;
+  gap: 6vw;
   justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at 85% 15%, rgba(217, 117, 0, 0.06) 0%, transparent 45%);
 }
-
-
 
 .leftPanel {
   height: 100%;
   display: flex;
   align-items: center;
+  max-width: 560px;
+}
 
+.leftPanel .heroEyebrow {
+  color: #D97500;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.leftPanel h1 {
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #16233b;
+  margin-bottom: 14px;
+}
+
+.leftPanel .heroSubtitle {
+  color: #6b6b6b;
+  font-size: 1.02rem;
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.joinCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #ffffff;
+  padding: 18px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(22, 35, 59, 0.08);
+  border: 1px solid #efefef;
+}
+
+.meetingCodeField {
+  flex: 1;
+}
+
+.joinCallBtn {
+  background: #D97500 !important;
+  padding-inline: 26px !important;
+  height: 56px;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  box-shadow: none !important;
+  flex-shrink: 0;
+}
+
+.joinCallBtn:hover {
+  background: #FF9839 !important;
+}
+
+.joinCallBtn:disabled {
+  background: #f0d9bd !important;
+  color: #fff !important;
 }
 
 .rightPanel {
@@ -121,4 +238,28 @@
   height: auto;
   border-radius: 20px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+@media (max-width: 900px) {
+  .meetContainer {
+    flex-direction: column;
+    padding-block: 40px;
+    gap: 40px;
+  }
+
+  .leftPanel h1 {
+    font-size: 1.9rem;
+  }
+
+  .rightPanel > img {
+    width: 70vw;
+  }
+
+  .joinCard {
+    flex-direction: column;
+  }
+
+  .joinCallBtn {
+    width: 100%;
+  }
 }

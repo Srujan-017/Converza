@@ -1,61 +1,580 @@
+/* ==========================================================================
+   Converza – Meeting Room (Zoom-style gallery UI)
+   ========================================================================== */
+
+:root {
+    --cz-bg: #0e1013;
+    --cz-tile-bg: #202124;
+    --cz-tile-border: #303134;
+    --cz-panel-bg: #1c1d20;
+    --cz-accent: #2d8cff;      /* Zoom-blue accent for primary actions */
+    --cz-accent-hover: #1c7ce8;
+    --cz-danger: #e02828;
+    --cz-danger-hover: #c81f1f;
+    --cz-text: #f1f1f3;
+    --cz-text-dim: #a7a9ac;
+    --cz-control-bg: rgba(32, 33, 36, 0.92);
+    --cz-control-hover: rgba(255, 255, 255, 0.12);
+}
+
+/* -------------------------------------------------------------------------
+   Pre-join lobby
+   ------------------------------------------------------------------------- */
+
+.lobbyContainer {
+    min-height: 100vh;
+    width: 100%;
+    background: radial-gradient(circle at 20% 20%, #16233b 0%, var(--cz-bg) 55%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.lobbyCard {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    max-width: 920px;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.lobbyPreviewWrap {
+    position: relative;
+    width: 460px;
+    max-width: 100%;
+    aspect-ratio: 16 / 10;
+    background: #17181a;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+    border: 1px solid var(--cz-tile-border);
+}
+
+.lobbyPreviewVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+    background: #17181a;
+}
+
+.lobbyPreviewBadge {
+    position: absolute;
+    left: 14px;
+    bottom: 14px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.55);
+    color: var(--cz-text);
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+.lobbyForm {
+    width: 340px;
+    max-width: 100%;
+    color: var(--cz-text);
+}
+
+.lobbyEyebrow {
+    color: var(--cz-accent);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.lobbyTitle {
+    font-size: 1.9rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    line-height: 1.2;
+}
+
+.lobbySubtitle {
+    color: var(--cz-text-dim);
+    font-size: 0.95rem;
+    margin-bottom: 28px;
+}
+
+.lobbyFormField {
+    margin-bottom: 20px !important;
+    width: 100%;
+}
+
+.lobbyFormField input {
+    color: #ffffff;
+}
+
+.lobbyFormField label {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.lobbyFormField label.Mui-focused {
+    color: #ffffff;
+}
+
+.lobbyFormField :global(.MuiOutlinedInput-notchedOutline) {
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.lobbyFormField:hover :global(.MuiOutlinedInput-notchedOutline) {
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.lobbyFormField :global(.Mui-focused) :global(.MuiOutlinedInput-notchedOutline) {
+    border-color: #ffffff !important;
+    border-width: 2px;
+}
+
+.lobbyJoinButton {
+    width: 100%;
+    padding: 12px !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    text-transform: none !important;
+    background: var(--cz-accent) !important;
+    box-shadow: none !important;
+}
+
+.lobbyJoinButton:hover {
+    background: var(--cz-accent-hover) !important;
+}
+
+/* -------------------------------------------------------------------------
+   Meeting room shell
+   ------------------------------------------------------------------------- */
+
 .meetVideoContainer {
     position: relative;
     height: 100vh;
-    background: rgb(1, 4, 48);
-}
-
-.meetUserVideo {
-    position: absolute;
-    bottom: 10vh;
-    height: 20vh;
-    width: auto;
-    left: 0;
-    border-radius: 20px;
-}
-
-.buttonContainers {
-    position: absolute;
-    width: 100vw;
-    bottom: 0;
-    text-align: center;
-}
-
-.buttonContainers svg {
-    font-size: 3rem;
-}
-
-.conferenceView { 
-
+    width: 100%;
+    background: var(--cz-bg);
     display: flex;
-    
-    padding: 10px;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.topBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 22px;
+    color: var(--cz-text);
+    flex-shrink: 0;
+    z-index: 5;
+}
+
+.topBarLeft {
+    display: flex;
+    align-items: center;
     gap: 10px;
 }
 
-.conferenceView  video {
-    width: 40vw;
-    height: 20vh;
-    min-width: 30vw;
-    border-radius: 10px;
+.liveDot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--cz-danger);
+    box-shadow: 0 0 0 3px rgba(224, 40, 40, 0.25);
 }
+
+.topBarTitle {
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+.topBarRight {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--cz-text-dim);
+    font-size: 0.85rem;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+/* -------------------------------------------------------------------------
+   Gallery grid
+   ------------------------------------------------------------------------- */
+
+.meetingBody {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+}
+
+.galleryWrap {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 20px 20px;
+    box-sizing: border-box;
+    overflow: auto;
+}
+
+.videoGrid {
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-auto-rows: minmax(160px, 1fr);
+    gap: 14px;
+    align-content: center;
+    justify-content: center;
+}
+
+.videoTile {
+    position: relative;
+    background: var(--cz-tile-bg);
+    border: 1px solid var(--cz-tile-border);
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+    transition: box-shadow 0.15s ease;
+}
+
+.videoTile:hover {
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
+}
+
+.tileVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: var(--cz-tile-bg);
+    display: block;
+}
+
+.localTileVideo {
+    transform: scaleX(-1);
+}
+
+.avatarOverlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--cz-tile-bg);
+}
+
+.avatarCircle {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: var(--cz-accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.tileLabel {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 7px;
+    background: rgba(0, 0, 0, 0.55);
+    color: var(--cz-text);
+    font-size: 0.82rem;
+    font-weight: 500;
+    max-width: calc(100% - 20px);
+}
+
+.tileLabel span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tileMicOffIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.55);
+    border-radius: 7px;
+    padding: 5px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.tileMicOffIcon svg {
+    font-size: 1rem !important;
+    color: var(--cz-danger);
+}
+
+/* -------------------------------------------------------------------------
+   Chat side panel
+   ------------------------------------------------------------------------- */
 
 .chatRoom {
-    position: absolute;
-    height: 90vh;
-    right: 0;
-    background: white;
-    border-radius: 10px;
-    width: 30vw;
-    padding-inline: 20px;
-}
-
-.chatContainer {
-    position: relative;
+    flex-shrink: 0;
+    width: 320px;
+    max-width: 88vw;
+    background: var(--cz-panel-bg);
+    border-left: 1px solid var(--cz-tile-border);
+    display: flex;
+    flex-direction: column;
     height: 100%;
 }
 
+.chatContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.chatHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--cz-tile-border);
+    flex-shrink: 0;
+}
+
+.chatHeader h1 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--cz-text);
+    margin: 0;
+}
+
+.chatCloseBtn {
+    color: var(--cz-text-dim) !important;
+}
+
+.chattingDisplay {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.chattingDisplay p {
+    color: var(--cz-text-dim);
+    font-size: 0.88rem;
+    text-align: center;
+    margin-top: 30px;
+}
+
+.chatBubble {
+    max-width: 90%;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    padding: 8px 12px;
+}
+
+.chatBubbleSender {
+    font-weight: 700;
+    font-size: 0.78rem;
+    color: var(--cz-accent);
+    margin-bottom: 3px;
+}
+
+.chatBubbleText {
+    font-size: 0.88rem;
+    color: var(--cz-text);
+    word-break: break-word;
+}
 
 .chattingArea {
-    position: absolute;
-    bottom: 0;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px;
+    border-top: 1px solid var(--cz-tile-border);
+}
+
+.chattingArea > div:first-child {
+    flex: 1;
+}
+
+.chatInput input {
+    color: var(--cz-text);
+}
+
+.chatInput label {
+    color: var(--cz-text-dim);
+}
+
+.chatInput label.Mui-focused {
+    color: var(--cz-accent);
+}
+
+.chatInput :global(.MuiOutlinedInput-notchedOutline) {
+    border-color: var(--cz-tile-border);
+}
+
+.chatInput:hover :global(.MuiOutlinedInput-notchedOutline) {
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.chatInput :global(.Mui-focused) :global(.MuiOutlinedInput-notchedOutline) {
+    border-color: var(--cz-accent) !important;
+}
+
+.chatSendBtn {
+    background: var(--cz-accent) !important;
+    min-width: 44px !important;
+    height: 40px;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+}
+
+.chatSendBtn:hover {
+    background: var(--cz-accent-hover) !important;
+}
+
+/* -------------------------------------------------------------------------
+   Bottom control bar
+   ------------------------------------------------------------------------- */
+
+.buttonContainers {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 0 20px;
+    z-index: 6;
+}
+
+.controlPill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--cz-control-bg);
+    backdrop-filter: blur(6px);
+    padding: 8px;
+    border-radius: 16px;
+    border: 1px solid var(--cz-tile-border);
+}
+
+.controlBtn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    width: 66px;
+    padding: 8px 4px 6px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--cz-text);
+    background: transparent;
+    border: none;
+    transition: background 0.15s ease;
+    font-family: inherit;
+}
+
+.controlBtn:hover {
+    background: var(--cz-control-hover);
+}
+
+.controlBtn svg {
+    font-size: 1.35rem !important;
+}
+
+.controlBtnLabel {
+    font-size: 0.66rem;
+    font-weight: 500;
+    color: var(--cz-text-dim);
+    letter-spacing: 0.01em;
+}
+
+.controlBtnOff svg {
+    color: var(--cz-danger) !important;
+}
+
+.endCallBtn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    width: 74px;
+    padding: 8px 4px 6px;
+    border-radius: 10px;
+    cursor: pointer;
+    background: var(--cz-danger);
+    border: none;
+    color: #fff;
+    transition: background 0.15s ease;
+    font-family: inherit;
+}
+
+.endCallBtn:hover {
+    background: var(--cz-danger-hover);
+}
+
+.endCallBtn svg {
+    font-size: 1.35rem !important;
+    color: #fff !important;
+}
+
+.endCallBtn .controlBtnLabel {
+    color: #fff;
+}
+
+.chatBadge span {
+    background: var(--cz-accent) !important;
+}
+
+/* -------------------------------------------------------------------------
+   Responsive
+   ------------------------------------------------------------------------- */
+
+@media (max-width: 760px) {
+    .chatRoom {
+        position: fixed;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 86vw;
+        z-index: 20;
+        box-shadow: -8px 0 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .galleryWrap {
+        padding: 6px 10px 14px;
+    }
+
+    .controlBtn,
+    .endCallBtn {
+        width: 54px;
+    }
+
+    .controlBtnLabel {
+        display: none;
+    }
+
+    .lobbyCard {
+        flex-direction: column;
+    }
 }
