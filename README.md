@@ -295,30 +295,21 @@ Meeting History Saved
 
 # 📸 Screenshots
 
-> Add screenshots of the following pages here.
+Experience Converza through its clean, modern, and intuitive interface.
 
-- Landing Page
-- Login Page
-- Home Dashboard
-- Video Meeting
-- Chat Panel
-- Screen Sharing
-- Meeting History
+| Landing Page | Login Page |
+|--------------|------------|
+| <img src="./screenshots/landing.png" alt="Landing Page" width="100%"> | <img src="./screenshots/login.png" alt="Login Page" width="100%"> |
 
-Example:
+| Home Dashboard | Chat Panel |
+|----------------|------------|
+| <img src="./screenshots/dashboard.png" alt="Home Dashboard" width="100%"> | <img src="./screenshots/chat.png" alt="Chat Panel" width="100%"> |
 
-```
-screenshots/
-│
-├── landing.png
-├── login.png
-├── dashboard.png
-├── meeting.png
-├── chat.png
-└── history.png
-```
+| Screen Sharing | Meeting History |
+|----------------|-----------------|
+| <img src="./screenshots/screenshare.png" alt="Screen Sharing" width="100%"> | <img src="./screenshots/history.png" alt="Meeting History" width="100%"> |
 
----
+> **Note:** The Video Meeting screenshot will be added in a future update.
 
 # 🤝 Contributing
 
