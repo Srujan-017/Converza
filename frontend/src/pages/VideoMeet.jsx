@@ -75,6 +75,11 @@ export default function VideoMeetComponent() {
 
     let [videos, setVideos] = useState([])
 
+    // socketId of whoever is currently sharing their screen (or null if no
+    // one is). When set, the meeting switches to a Zoom-style full-screen
+    // spotlight for that person's video instead of the regular grid.
+    let [screenSharingId, setScreenSharingId] = useState(null)
+
     // TODO
     // if(isChrome() === false) {
 
@@ -233,6 +238,14 @@ export default function VideoMeetComponent() {
         window.localStream = stream
         localVideoref.current.srcObject = stream
 
+        // Screen sharing has started successfully: tell everyone else in
+        // the call so their UI can promote this tile to the full-screen
+        // spotlight, and mark it locally too.
+        setScreenSharingId(socketIdRef.current)
+        if (socketRef.current) {
+            socketRef.current.emit('screen-share-toggle', true)
+        }
+
         for (let id in connections) {
             if (id === socketIdRef.current) continue
 
@@ -249,6 +262,14 @@ export default function VideoMeetComponent() {
 
         stream.getTracks().forEach(track => track.onended = () => {
             setScreen(false)
+
+            // The browser's own "Stop sharing" control (or the OS/tab
+            // picker being closed) ends the track directly, bypassing our
+            // button handler — so we announce the stop here too.
+            setScreenSharingId(null)
+            if (socketRef.current) {
+                socketRef.current.emit('screen-share-toggle', false)
+            }
 
             try {
                 let tracks = localVideoref.current.srcObject.getTracks()
@@ -302,6 +323,19 @@ export default function VideoMeetComponent() {
 
             socketRef.current.on('user-left', (id) => {
                 setVideos((videos) => videos.filter((video) => video.socketId !== id))
+                // If the participant who left was the one being spotlighted,
+                // fall back to the regular grid instead of showing a dead tile.
+                setScreenSharingId((current) => (current === id ? null : current))
+            })
+
+            // Another participant (or the server, for someone who joined
+            // mid-share) announced a screen-share start/stop. Keep our own
+            // spotlight state in sync so this client's layout matches.
+            socketRef.current.on('screen-share-status', (fromId, sharing) => {
+                setScreenSharingId((current) => {
+                    if (sharing) return fromId
+                    return current === fromId ? null : current
+                })
             })
 
             socketRef.current.on('user-joined', (id, clients) => {
@@ -420,8 +454,30 @@ export default function VideoMeetComponent() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [screen])
+    // Stops an in-progress screen share started from our own "Share"
+    // button (as opposed to the browser's native "Stop sharing" bar, which
+    // is already handled by the track.onended listener above) and falls
+    // back to the camera, the same way clicking "Stop Share" in Zoom does.
+    let stopScreenShare = () => {
+        try {
+            window.localStream.getTracks().forEach(track => track.stop())
+        } catch (e) { console.log(e) }
+
+        setScreen(false)
+        setScreenSharingId(null)
+        if (socketRef.current) {
+            socketRef.current.emit('screen-share-toggle', false)
+        }
+
+        getUserMedia()
+    }
+
     let handleScreen = () => {
-        setScreen(!screen);
+        if (screen) {
+            stopScreenShare()
+        } else {
+            setScreen(true)
+        }
     }
 
     let handleEndCall = () => {
@@ -458,6 +514,15 @@ export default function VideoMeetComponent() {
         getMedia();
     }
 
+    // Whoever is currently screen-sharing (local or remote) gets promoted
+    // to a full-screen spotlight, Zoom/Meet-style; everyone else moves into
+    // a thumbnail strip alongside it. Falls back to the regular gallery
+    // grid when no one is presenting.
+    const isLocalSharing = screenSharingId !== null && screenSharingId === socketIdRef.current;
+    const remoteSharer = screenSharingId !== null && !isLocalSharing
+        ? videos.find((v) => v.socketId === screenSharingId)
+        : null;
+    const isSpotlightActive = isLocalSharing || !!remoteSharer;
 
     return (
         <div>
@@ -510,47 +575,114 @@ export default function VideoMeetComponent() {
                     <div className={styles.meetingBody}>
 
                         <div className={styles.galleryWrap}>
-                            <div className={styles.videoGrid}>
+                            {isSpotlightActive ? (
+                                <div className={styles.spotlightLayout}>
 
-                                <div className={styles.videoTile}>
-                                    <video className={`${styles.tileVideo} ${styles.localTileVideo}`} ref={localVideoref} autoPlay muted></video>
-                                    {video === false && (
-                                        <div className={styles.avatarOverlay}>
-                                            <div className={styles.avatarCircle}>
-                                                {username ? username.charAt(0).toUpperCase() : "Y"}
-                                            </div>
-                                        </div>
-                                    )}
-                                    {audio === false && (
-                                        <div className={styles.tileMicOffIcon}>
-                                            <MicOffIcon fontSize="small" />
-                                        </div>
-                                    )}
-                                    <div className={styles.tileLabel}>
-                                        <span>{username || "You"} (You)</span>
-                                    </div>
-                                </div>
-
-                                {videos.map((video) => (
-                                    <div className={styles.videoTile} key={video.socketId}>
+                                    <div className={styles.spotlightMain}>
                                         <video
-                                            className={styles.tileVideo}
-                                            data-socket={video.socketId}
-                                            ref={ref => {
-                                                if (ref && video.stream) {
-                                                    ref.srcObject = video.stream;
+                                            className={styles.spotlightVideo}
+                                            ref={isLocalSharing ? localVideoref : (ref) => {
+                                                if (ref && remoteSharer && remoteSharer.stream) {
+                                                    ref.srcObject = remoteSharer.stream;
                                                 }
                                             }}
                                             autoPlay
-                                        >
-                                        </video>
-                                        <div className={styles.tileLabel}>
-                                            <span>Participant</span>
+                                            muted={isLocalSharing}
+                                        ></video>
+                                        <div className={styles.spotlightBadge}>
+                                            <ScreenShareIcon fontSize="small" />
+                                            <span>{isLocalSharing ? "You are presenting your screen" : "Participant is presenting their screen"}</span>
                                         </div>
                                     </div>
-                                ))}
 
-                            </div>
+                                    <div className={styles.spotlightSidebar}>
+
+                                        {!isLocalSharing && (
+                                            <div className={styles.spotlightThumb}>
+                                                <video className={`${styles.spotlightThumbVideo} ${styles.localTileVideo}`} ref={localVideoref} autoPlay muted></video>
+                                                {video === false && (
+                                                    <div className={styles.avatarOverlay}>
+                                                        <div className={styles.avatarCircle}>
+                                                            {username ? username.charAt(0).toUpperCase() : "Y"}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {audio === false && (
+                                                    <div className={styles.tileMicOffIcon}>
+                                                        <MicOffIcon fontSize="small" />
+                                                    </div>
+                                                )}
+                                                <div className={styles.tileLabel}>
+                                                    <span>{username || "You"} (You)</span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {videos.filter((v) => v.socketId !== screenSharingId).map((video) => (
+                                            <div className={styles.spotlightThumb} key={video.socketId}>
+                                                <video
+                                                    className={styles.spotlightThumbVideo}
+                                                    data-socket={video.socketId}
+                                                    ref={ref => {
+                                                        if (ref && video.stream) {
+                                                            ref.srcObject = video.stream;
+                                                        }
+                                                    }}
+                                                    autoPlay
+                                                >
+                                                </video>
+                                                <div className={styles.tileLabel}>
+                                                    <span>Participant</span>
+                                                </div>
+                                            </div>
+                                        ))}
+
+                                    </div>
+
+                                </div>
+                            ) : (
+                                <div className={styles.videoGrid}>
+
+                                    <div className={styles.videoTile}>
+                                        <video className={`${styles.tileVideo} ${styles.localTileVideo}`} ref={localVideoref} autoPlay muted></video>
+                                        {video === false && (
+                                            <div className={styles.avatarOverlay}>
+                                                <div className={styles.avatarCircle}>
+                                                    {username ? username.charAt(0).toUpperCase() : "Y"}
+                                                </div>
+                                            </div>
+                                        )}
+                                        {audio === false && (
+                                            <div className={styles.tileMicOffIcon}>
+                                                <MicOffIcon fontSize="small" />
+                                            </div>
+                                        )}
+                                        <div className={styles.tileLabel}>
+                                            <span>{username || "You"} (You)</span>
+                                        </div>
+                                    </div>
+
+                                    {videos.map((video) => (
+                                        <div className={styles.videoTile} key={video.socketId}>
+                                            <video
+                                                className={styles.tileVideo}
+                                                data-socket={video.socketId}
+                                                ref={ref => {
+                                                    if (ref && video.stream) {
+                                                        ref.srcObject = video.stream;
+                                                    }
+                                                }}
+                                                autoPlay
+                                            >
+                                            </video>
+                                            <div className={styles.tileLabel}>
+                                                <span>Participant</span>
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                </div>
+                            )}
                         </div>
 
                         {showModal ? <div className={styles.chatRoom}>
@@ -613,9 +745,9 @@ export default function VideoMeetComponent() {
                             </button>
 
                             {screenAvailable === true &&
-                                <button className={styles.controlBtn} onClick={handleScreen}>
-                                    {screen === true ? <ScreenShareIcon /> : <StopScreenShareIcon />}
-                                    <span className={styles.controlBtnLabel}>{screen === true ? 'Sharing' : 'Share'}</span>
+                                <button className={`${styles.controlBtn} ${screen === true ? styles.controlBtnActive : ''}`} onClick={handleScreen}>
+                                    {screen === true ? <StopScreenShareIcon /> : <ScreenShareIcon />}
+                                    <span className={styles.controlBtnLabel}>{screen === true ? 'Stop Share' : 'Share'}</span>
                                 </button>
                             }
 
