@@ -51,7 +51,7 @@ export default function VideoMeetComponent() {
 
     let [audioAvailable, setAudioAvailable] = useState(true);
 
-    let [video, setVideo] = useState([]);
+    let [video, setVideo] = useState(true);
 
     let [audio, setAudio] = useState();
 
@@ -65,11 +65,12 @@ export default function VideoMeetComponent() {
 
     let [message, setMessage] = useState("");
 
-    let [newMessages, setNewMessages] = useState(3);
+    let [newMessages, setNewMessages] = useState(0);
 
     let [askForUsername, setAskForUsername] = useState(true);
 
-    let [username, setUsername] = useState("");
+    // Pre-populate from sessionStorage when the user arrives via the guest join flow
+    let [username, setUsername] = useState(() => sessionStorage.getItem('guestName') || "");
 
     const videoRef = useRef([])
 
@@ -91,6 +92,26 @@ export default function VideoMeetComponent() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
+    // Clean up media tracks, socket, and peer connections on unmount
+    useEffect(() => {
+        return () => {
+            try {
+                if (window.localStream) {
+                    window.localStream.getTracks().forEach(track => track.stop());
+                }
+            } catch (e) { }
+            if (socketRef.current) {
+                socketRef.current.disconnect();
+            }
+            for (let id in connections) {
+                try { connections[id].close(); } catch (e) { }
+            }
+            Object.keys(connections).forEach(key => delete connections[key]);
+            sessionStorage.removeItem('guestName');
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
     let getDislayMedia = () => {
         if (screen) {
             if (navigator.mediaDevices.getDisplayMedia) {
@@ -103,42 +124,53 @@ export default function VideoMeetComponent() {
     }
 
     const getPermissions = async () => {
+        // Use local variables to avoid reading stale React state after async awaits
+        let videoPermissionGranted = false;
+        let audioPermissionGranted = false;
+
         try {
-            const videoPermission = await navigator.mediaDevices.getUserMedia({ video: true });
-            if (videoPermission) {
-                setVideoAvailable(true);
-                console.log('Video permission granted');
-            } else {
-                setVideoAvailable(false);
-                console.log('Video permission denied');
-            }
+            const videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+            videoStream.getTracks().forEach(t => t.stop());
+            videoPermissionGranted = true;
+            setVideoAvailable(true);
+            console.log('Video permission granted');
+        } catch (e) {
+            setVideoAvailable(false);
+            console.log('Video permission denied');
+        }
 
-            const audioPermission = await navigator.mediaDevices.getUserMedia({ audio: true });
-            if (audioPermission) {
-                setAudioAvailable(true);
-                console.log('Audio permission granted');
-            } else {
-                setAudioAvailable(false);
-                console.log('Audio permission denied');
-            }
+        try {
+            const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            audioStream.getTracks().forEach(t => t.stop());
+            audioPermissionGranted = true;
+            setAudioAvailable(true);
+            console.log('Audio permission granted');
+        } catch (e) {
+            setAudioAvailable(false);
+            console.log('Audio permission denied');
+        }
 
-            if (navigator.mediaDevices.getDisplayMedia) {
-                setScreenAvailable(true);
-            } else {
-                setScreenAvailable(false);
-            }
+        if (navigator.mediaDevices.getDisplayMedia) {
+            setScreenAvailable(true);
+        } else {
+            setScreenAvailable(false);
+        }
 
-            if (videoAvailable || audioAvailable) {
-                const userMediaStream = await navigator.mediaDevices.getUserMedia({ video: videoAvailable, audio: audioAvailable });
+        if (videoPermissionGranted || audioPermissionGranted) {
+            try {
+                const userMediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: videoPermissionGranted,
+                    audio: audioPermissionGranted
+                });
                 if (userMediaStream) {
                     window.localStream = userMediaStream;
                     if (localVideoref.current) {
                         localVideoref.current.srcObject = userMediaStream;
                     }
                 }
+            } catch (error) {
+                console.log(error);
             }
-        } catch (error) {
-            console.log(error);
         }
     };
 
@@ -316,7 +348,11 @@ export default function VideoMeetComponent() {
         socketRef.current.on('signal', gotMessageFromServer)
 
         socketRef.current.on('connect', () => {
-            socketRef.current.emit('join-call', window.location.href)
+            // Derive the room ID from the pathname only (strip leading slash).
+            // Using the full href would make "abc123" and "abc123?guest=true"
+            // land in different rooms, breaking multi-user synchronization.
+            const meetingId = window.location.pathname.replace(/^\/+/, '');
+            socketRef.current.emit('join-call', meetingId)
             socketIdRef.current = socketRef.current.id
 
             socketRef.current.on('chat-message', addMessage)
@@ -485,6 +521,19 @@ export default function VideoMeetComponent() {
             let tracks = localVideoref.current.srcObject.getTracks()
             tracks.forEach(track => track.stop())
         } catch (e) { }
+        try {
+            if (window.localStream) {
+                window.localStream.getTracks().forEach(track => track.stop());
+            }
+        } catch (e) { }
+        if (socketRef.current) {
+            socketRef.current.disconnect();
+        }
+        for (let id in connections) {
+            try { connections[id].close(); } catch (e) { }
+        }
+        Object.keys(connections).forEach(key => delete connections[key]);
+        sessionStorage.removeItem('guestName');
         window.location.href = "/"
     }
 

@@ -6,6 +6,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import VideoMeetComponent from './pages/VideoMeet';
 import HomeComponent from './pages/home';
 import History from './pages/history';
+import GuestJoin from './pages/GuestJoin';
 
 function App() {
   return (
@@ -24,6 +25,9 @@ function App() {
 
             <Route path='/home' element={<HomeComponent />} />
             <Route path='/history' element={<History />} />
+            {/* /guest must be declared before /:url so React Router
+                does not treat the literal string "guest" as a meeting ID */}
+            <Route path='/guest' element={<GuestJoin />} />
             <Route path='/:url' element={<VideoMeetComponent />} />
           </Routes>
         </AuthProvider>
