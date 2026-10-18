@@ -4,8 +4,6 @@ import express from "express";
 
 import { createServer } from "node:http";
 
-import { Server } from "socket.io";
-
 import mongoose from "mongoose";
 import { connectToSocket } from "./controllers/socketManager.js";
 import { startWorkers, sfuAvailable } from "./sfu/workers.js";
@@ -16,7 +14,7 @@ import userRoutes from "./routes/users.routes.js";
 
 const app = express();
 const server = createServer(app);
-const io = connectToSocket(server);
+connectToSocket(server);
 
 
 app.set("port", (process.env.PORT || 8000))
@@ -50,8 +48,14 @@ const start = async () => {
 
     console.log(`MONGO Connected DB Host: ${connectionDb.connection.host}`)
 
-    // If mediasoup can't start, the app still runs; only SFU calls are unavailable.
-    await startWorkers();
+    // The SFU is opt-in: hosts that can't receive media on the SFU ports (e.g.
+    // Render) leave it off and meetings use peer-to-peer. If mediasoup fails
+    // to start, the app still runs and meetings fall back the same way.
+    if (process.env.SFU_ENABLED === "true") {
+        await startWorkers();
+    } else {
+        console.log("SFU disabled (set SFU_ENABLED=true to enable); meetings use peer-to-peer");
+    }
 
     server.listen(app.get("port"), () => {
         console.log(`LISTENING ON PORT ${app.get("port")}`)

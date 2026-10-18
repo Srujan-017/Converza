@@ -5,7 +5,6 @@ import { removePeer as removeSfuPeer } from "../sfu/rooms.js"
 
 let connections = {}
 let messages = {}
-let timeOnline = {}
 // Tracks who (if anyone) is currently screen-sharing in each room, so that
 // a participant who joins mid-share (or refreshes) can be told immediately
 // instead of only finding out on the next toggle.
@@ -54,8 +53,6 @@ export const connectToSocket = (server) => {
 
     io.on("connection", (socket) => {
 
-        console.log("SOMETHING CONNECTED")
-
         // SFU events use the same meeting room this socket joined via join-call.
         registerSfuHandlers(io, socket, (socketId) => {
             const [room, found] = findRoomForSocket(socketId)
@@ -71,12 +68,7 @@ export const connectToSocket = (server) => {
             }
             connections[path].push(socket.id)
 
-            timeOnline[socket.id] = new Date();
             participantNames[socket.id] = cleanDisplayName(displayName)
-
-            // connections[path].forEach(elem => {
-            //     io.to(elem)
-            // })
 
             const names = namesForRoom(path)
             for (let a = 0; a < connections[path].length; a++) {
@@ -119,7 +111,6 @@ export const connectToSocket = (server) => {
                 }
 
                 messages[matchingRoom].push({ 'sender': sender, "data": data, "socket-id-sender": socket.id })
-                console.log("message", matchingRoom, ":", sender, data)
 
                 connections[matchingRoom].forEach((elem) => {
                     io.to(elem).emit("chat-message", data, sender, socket.id)
@@ -151,8 +142,6 @@ export const connectToSocket = (server) => {
         })
 
         socket.on("disconnect", () => {
-
-            var diffTime = Math.abs(timeOnline[socket.id] - new Date())
 
             var key
 
@@ -190,7 +179,6 @@ export const connectToSocket = (server) => {
 
             }
 
-            delete timeOnline[socket.id]
             delete participantNames[socket.id]
 
             removeSfuPeer(socket.id).catch((e) => console.error("SFU cleanup failed:", e.message))

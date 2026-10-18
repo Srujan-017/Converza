@@ -1,6 +1,8 @@
-import * as mediasoup from "mediasoup";
 import { sfuConfig } from "./config.js";
 
+// Loaded only when the SFU is started: mediasoup is an optional dependency,
+// so a host where it can't install still runs the rest of Converza.
+let mediasoup = null;
 const workers = [];
 let nextWorkerIndex = 0;
 const workerDeathListeners = [];
@@ -20,6 +22,7 @@ const createWorker = async (index) => {
 // history, the current peer-to-peer calls) still runs if mediasoup can't start.
 export const startWorkers = async () => {
     try {
+        mediasoup = await import("mediasoup");
         for (let i = 0; i < sfuConfig.numWorkers; i++) await createWorker(i);
         console.log(`mediasoup ${mediasoup.version}: ${workers.length} worker(s) ready`);
         return true;

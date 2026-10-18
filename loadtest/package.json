@@ -5,9 +5,13 @@
   "type": "module",
   "description": "Joins N fake participants (headless Chrome, fake camera) to one Converza meeting and records WebRTC stats",
   "scripts": {
-    "start": "node run.mjs"
+    "start": "node run.mjs",
+    "e2e": "node full-app.mjs && node full-app.mjs --sfu"
   },
   "dependencies": {
     "puppeteer-core": "^24.0.0"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^10.4.3"
   }
 }

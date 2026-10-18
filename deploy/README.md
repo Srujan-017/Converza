@@ -102,3 +102,6 @@ DOMAIN=converza.duckdns.org bash ~/converza/deploy/setup-ec2.sh
 | Backend keeps restarting | `pm2 logs converza-backend` |
 
 After editing `backend/.env`, apply it with `pm2 restart converza-backend --update-env`.
+
+The script writes `SFU_ENABLED=true` into `backend/.env`. Without it (as on
+Render) the backend doesn't start the SFU and meetings use peer-to-peer.

@@ -98,12 +98,6 @@ export default function VideoMeetComponent() {
     const mediaModeRef = useRef(null)
     const sfuRef = useRef(null)
 
-    // TODO
-    // if(isChrome() === false) {
-
-
-    // }
-
     useEffect(() => {
         getPermissions();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -198,8 +192,6 @@ export default function VideoMeetComponent() {
     useEffect(() => {
         if (video !== undefined && audio !== undefined) {
             getUserMedia();
-            console.log("SET STATE HAS ", video, audio);
-
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -229,7 +221,6 @@ export default function VideoMeetComponent() {
             addStreamToConnection(connections[id], window.localStream)
 
             connections[id].createOffer().then((description) => {
-                console.log(description)
                 connections[id].setLocalDescription(description)
                     .then(() => {
                         socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }))
@@ -490,9 +481,6 @@ export default function VideoMeetComponent() {
 
                     // Wait for their video stream
                     connections[socketListId].ontrack = (event) => {
-                        console.log("BEFORE:", videoRef.current);
-                        console.log("FINDING ID: ", socketListId);
-
                         // event.streams[0] holds the remote MediaStream this track belongs to.
                         // ontrack fires once per track (audio/video), but both share the same
                         // stream object, so this stays in sync with the old single-stream logic.
@@ -648,11 +636,8 @@ export default function VideoMeetComponent() {
 
 
     let sendMessage = () => {
-        console.log(socketRef.current);
         socketRef.current.emit('chat-message', message, username)
         setMessage("");
-
-        // this.setState({ message: "", sender: username })
     }
 
     

@@ -45,6 +45,20 @@ node report.mjs results/phase6-mesh-<date>.json results/phase6-sfu-<date>.json -
 Each file becomes a column; with `--repeat`, values are the median across
 repeats with the range in brackets.
 
+## Full-app test
+
+`full-app.mjs` starts the real backend (`backend/src/app.js`) on a temporary
+in-memory MongoDB, serves the frontend build, and has fake users register,
+log in, join from home, let a guest join the same meeting, leave, check
+history and log out. It needs `npm run build` in `frontend/` and free ports
+3000 and 8000.
+
+```bash
+npm run e2e
+```
+
+This runs it twice: SFU off (as on Render) and SFU on (as on EC2).
+
 ## Feature checklist
 
 `features.mjs` runs the meeting checklist with fake participants: names,
