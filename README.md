@@ -6,7 +6,8 @@
 
 Build secure video meetings, collaborate through live chat, share your screen, and connect instantly from anywhere.
 
-**Live Demo:** https://converza-frontend.onrender.com
+**Live Demo (peer-to-peer):** https://converza-frontend.onrender.com
+**Live Demo (mediasoup SFU, AWS EC2):** https://converza.duckdns.org
 
 ![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![Node.js](https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=node.js&logoColor=white)
@@ -114,6 +115,8 @@ Same frontend build, measured with the backend SFU on and off. Headless Chrome p
 - The SFU server used about **31% of one CPU core** for a 5-person meeting.
 - Because one laptop runs every participant, it becomes the bottleneck at 6–8 people in both modes. These numbers compare the two designs; they aren't a promise of how many users a real deployment supports.
 
+**Verified on the real deployment:** the same checks above were run against the live AWS EC2 server (a `t3.micro`: 2 vCPUs, 1 GB RAM) over the public internet, not localhost. At 4 real participants: 30 fps, 480p, 0 freezes, and the SFU server itself used only 7.4% of one CPU core. Raw results: [loadtest/results/ec2-live-2026-10-18.json](loadtest/results/ec2-live-2026-10-18.json).
+
 ---
 
 # 🛠 Tech Stack
@@ -197,7 +200,8 @@ Converza
 
 ### 🌐 Application
 
-https://converza-frontend.onrender.com
+- Peer-to-peer mesh (Render): https://converza-frontend.onrender.com
+- mediasoup SFU (AWS EC2): https://converza.duckdns.org
 
 ---
 
