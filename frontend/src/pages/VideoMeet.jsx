@@ -14,6 +14,7 @@ import ChatIcon from '@mui/icons-material/Chat'
 import CloseIcon from '@mui/icons-material/Close'
 import SendIcon from '@mui/icons-material/Send'
 import server from '../environment';
+import { SfuSession, isSfuAvailable } from '../sfu/sfuClient';
 
 const server_url = server;
 
@@ -32,6 +33,14 @@ const peerConfigConnections = {
 let addStreamToConnection = (peerConnection, stream) => {
     if (!peerConnection || !stream) return
     stream.getTracks().forEach((track) => {
+        // A track already being sent (e.g. the mic kept during screen share)
+        // is re-labelled as part of the new stream instead of added twice, so
+        // the other side plays it together with the new video.
+        const existing = peerConnection.getSenders().find((sender) => sender.track === track)
+        if (existing) {
+            if (existing.setStreams) existing.setStreams(stream)
+            return
+        }
         try {
             peerConnection.addTrack(track, stream)
         } catch (e) {
@@ -81,11 +90,13 @@ export default function VideoMeetComponent() {
     // spotlight for that person's video instead of the regular grid.
     let [screenSharingId, setScreenSharingId] = useState(null)
 
-    // TODO
-    // if(isChrome() === false) {
+    // socketId -> display name for every remote participant, sent by the server.
+    let [participantNames, setParticipantNames] = useState({})
 
-
-    // }
+    // "sfu" when the server has a mediasoup SFU, otherwise "mesh" (the
+    // original peer-to-peer calls). Decided once, on the first connect.
+    const mediaModeRef = useRef(null)
+    const sfuRef = useRef(null)
 
     useEffect(() => {
         getPermissions();
@@ -100,6 +111,9 @@ export default function VideoMeetComponent() {
                     window.localStream.getTracks().forEach(track => track.stop());
                 }
             } catch (e) { }
+            if (sfuRef.current) {
+                sfuRef.current.close();
+            }
             if (socketRef.current) {
                 socketRef.current.disconnect();
             }
@@ -115,7 +129,8 @@ export default function VideoMeetComponent() {
     let getDislayMedia = () => {
         if (screen) {
             if (navigator.mediaDevices.getDisplayMedia) {
-                navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
+                // Screen video only: the presenter's own mic stays as the call's audio.
+                navigator.mediaDevices.getDisplayMedia({ video: true, audio: false })
                     .then(getDislayMediaSuccess)
                     .then((stream) => { })
                     .catch((e) => console.log(e))
@@ -177,8 +192,6 @@ export default function VideoMeetComponent() {
     useEffect(() => {
         if (video !== undefined && audio !== undefined) {
             getUserMedia();
-            console.log("SET STATE HAS ", video, audio);
-
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -200,6 +213,7 @@ export default function VideoMeetComponent() {
 
         window.localStream = stream
         localVideoref.current.srcObject = stream
+        syncSfuStream(stream)
 
         for (let id in connections) {
             if (id === socketIdRef.current) continue
@@ -207,7 +221,6 @@ export default function VideoMeetComponent() {
             addStreamToConnection(connections[id], window.localStream)
 
             connections[id].createOffer().then((description) => {
-                console.log(description)
                 connections[id].setLocalDescription(description)
                     .then(() => {
                         socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }))
@@ -254,6 +267,7 @@ export default function VideoMeetComponent() {
                 let tracks = localVideoref.current.srcObject.getTracks()
                 tracks.forEach(track => track.stop())
             } catch (e) { }
+            syncSfuStream(null)
         }
     }
 
@@ -262,13 +276,21 @@ export default function VideoMeetComponent() {
 
 
     let getDislayMediaSuccess = (stream) => {
-        console.log("HERE")
+        // Keep the presenter's microphone running: only the camera is
+        // replaced by the screen, so others can still hear them talk.
+        const micTracks = window.localStream
+            ? window.localStream.getAudioTracks().filter(track => track.readyState === 'live')
+            : []
         try {
-            window.localStream.getTracks().forEach(track => track.stop())
+            window.localStream.getVideoTracks().forEach(track => track.stop())
         } catch (e) { console.log(e) }
 
-        window.localStream = stream
-        localVideoref.current.srcObject = stream
+        const presentation = new MediaStream([...stream.getVideoTracks(), ...micTracks])
+        window.localStream = presentation
+        localVideoref.current.srcObject = presentation
+        // With the SFU, the screen replaces the camera on the same video
+        // producer, so others' existing tile simply shows the screen.
+        syncSfuStream(presentation)
 
         // Screen sharing has started successfully: tell everyone else in
         // the call so their UI can promote this tile to the full-screen
@@ -342,23 +364,84 @@ export default function VideoMeetComponent() {
 
 
 
+    // Tell the SFU about the current camera/mic (or screen) stream. No-op in mesh mode.
+    let syncSfuStream = (stream) => {
+        if (sfuRef.current) sfuRef.current.setLocalStream(stream)
+    }
+
+    // With the SFU, a tile exists for everyone in the room (from user-joined)
+    // and its media comes from the SFU. remote is { stream, videoOff, audioOff }
+    // or null when that person currently sends nothing.
+    let updateSfuTile = (peerId, remote) => {
+        setVideos(videos => {
+            const exists = videos.some(v => v.socketId === peerId)
+            if (!exists && !remote) return videos
+            const media = remote || { stream: null, videoOff: true, audioOff: true }
+            const updatedVideos = exists
+                ? videos.map(v => v.socketId === peerId ? { ...v, ...media } : v)
+                : [...videos, { socketId: peerId, autoplay: true, playsinline: true, ...media }]
+            videoRef.current = updatedVideos
+            return updatedVideos
+        })
+    }
+
+    let addSfuTilesFor = (clients) => {
+        setVideos(videos => {
+            const known = new Set(videos.map(v => v.socketId))
+            const added = clients
+                .filter(id => id !== socketIdRef.current && !known.has(id))
+                .map(id => ({ socketId: id, stream: null, videoOff: true, audioOff: true, autoplay: true, playsinline: true }))
+            if (added.length === 0) return videos
+            const updatedVideos = [...videos, ...added]
+            videoRef.current = updatedVideos
+            return updatedVideos
+        })
+    }
+
+    let startSfu = () => {
+        // On a reconnect the server has already dropped our old SFU session.
+        if (sfuRef.current) sfuRef.current.close()
+        setVideos([])
+        videoRef.current = []
+
+        const session = new SfuSession(socketRef.current, {
+            onRemoteChange: updateSfuTile,
+            onError: (e) => console.error("SFU:", e),
+        })
+        sfuRef.current = session
+        session.setLocalStream(window.localStream || null)
+        session.start()
+    }
+
     let connectToSocketServer = () => {
         socketRef.current = io.connect(server_url)
 
         socketRef.current.on('signal', gotMessageFromServer)
 
-        socketRef.current.on('connect', () => {
+        socketRef.current.on('connect', async () => {
+            if (mediaModeRef.current === null) {
+                mediaModeRef.current = (await isSfuAvailable(socketRef.current)) ? 'sfu' : 'mesh'
+                console.log(`Converza media mode: ${mediaModeRef.current}`)
+            }
+
             // Derive the room ID from the pathname only (strip leading slash).
             // Using the full href would make "abc123" and "abc123?guest=true"
             // land in different rooms, breaking multi-user synchronization.
             const meetingId = window.location.pathname.replace(/^\/+/, '');
-            socketRef.current.emit('join-call', meetingId)
+            socketRef.current.emit('join-call', meetingId, username)
             socketIdRef.current = socketRef.current.id
+
+            if (mediaModeRef.current === 'sfu') startSfu()
 
             socketRef.current.on('chat-message', addMessage)
 
             socketRef.current.on('user-left', (id) => {
                 setVideos((videos) => videos.filter((video) => video.socketId !== id))
+                setParticipantNames((names) => {
+                    const updated = { ...names }
+                    delete updated[id]
+                    return updated
+                })
                 // If the participant who left was the one being spotlighted,
                 // fall back to the regular grid instead of showing a dead tile.
                 setScreenSharingId((current) => (current === id ? null : current))
@@ -374,7 +457,18 @@ export default function VideoMeetComponent() {
                 })
             })
 
-            socketRef.current.on('user-joined', (id, clients) => {
+            socketRef.current.on('user-joined', (id, clients, names) => {
+                if (names) {
+                    setParticipantNames((current) => ({ ...current, ...names }))
+                }
+
+                // SFU: media arrives through the SFU session; only make sure
+                // everyone in the room has a tile. The rest is peer-to-peer only.
+                if (mediaModeRef.current === 'sfu') {
+                    addSfuTilesFor(clients)
+                    return
+                }
+
                 clients.forEach((socketListId) => {
 
                     connections[socketListId] = new RTCPeerConnection(peerConfigConnections)
@@ -387,9 +481,6 @@ export default function VideoMeetComponent() {
 
                     // Wait for their video stream
                     connections[socketListId].ontrack = (event) => {
-                        console.log("BEFORE:", videoRef.current);
-                        console.log("FINDING ID: ", socketListId);
-
                         // event.streams[0] holds the remote MediaStream this track belongs to.
                         // ontrack fires once per track (audio/video), but both share the same
                         // stream object, so this stays in sync with the old single-stream logic.
@@ -397,35 +488,27 @@ export default function VideoMeetComponent() {
                             ? event.streams[0]
                             : new MediaStream([event.track]);
 
-                        let videoExists = videoRef.current.find(video => video.socketId === socketListId);
+                        // Decide "update or add" inside the updater, against the latest
+                        // list. Checking videoRef outside it raced when the audio and
+                        // video ontrack events arrived before React applied the first
+                        // update, which produced a duplicate tile for the same person.
+                        setVideos(videos => {
+                            const videoExists = videos.some(video => video.socketId === socketListId);
 
-                        if (videoExists) {
-                            console.log("FOUND EXISTING");
-
-                            // Update the stream of the existing video
-                            setVideos(videos => {
-                                const updatedVideos = videos.map(video =>
+                            const updatedVideos = videoExists
+                                ? videos.map(video =>
                                     video.socketId === socketListId ? { ...video, stream: remoteStream } : video
-                                );
-                                videoRef.current = updatedVideos;
-                                return updatedVideos;
-                            });
-                        } else {
-                            // Create a new video
-                            console.log("CREATING NEW");
-                            let newVideo = {
-                                socketId: socketListId,
-                                stream: remoteStream,
-                                autoplay: true,
-                                playsinline: true
-                            };
+                                )
+                                : [...videos, {
+                                    socketId: socketListId,
+                                    stream: remoteStream,
+                                    autoplay: true,
+                                    playsinline: true
+                                }];
 
-                            setVideos(videos => {
-                                const updatedVideos = [...videos, newVideo];
-                                videoRef.current = updatedVideos;
-                                return updatedVideos;
-                            });
-                        }
+                            videoRef.current = updatedVideos;
+                            return updatedVideos;
+                        });
                     };
 
 
@@ -526,6 +609,9 @@ export default function VideoMeetComponent() {
                 window.localStream.getTracks().forEach(track => track.stop());
             }
         } catch (e) { }
+        if (sfuRef.current) {
+            sfuRef.current.close();
+        }
         if (socketRef.current) {
             socketRef.current.disconnect();
         }
@@ -550,11 +636,8 @@ export default function VideoMeetComponent() {
 
 
     let sendMessage = () => {
-        console.log(socketRef.current);
         socketRef.current.emit('chat-message', message, username)
         setMessage("");
-
-        // this.setState({ message: "", sender: username })
     }
 
     
@@ -572,6 +655,26 @@ export default function VideoMeetComponent() {
         ? videos.find((v) => v.socketId === screenSharingId)
         : null;
     const isSpotlightActive = isLocalSharing || !!remoteSharer;
+
+    // Camera-off avatar and muted icon for a remote tile. The SFU tells us
+    // when someone pauses their camera or mic; peer-to-peer mode can't, so
+    // these flags are only ever set there.
+    const remoteStatusOverlays = (remote) => (
+        <>
+            {remote.videoOff && (
+                <div className={styles.avatarOverlay}>
+                    <div className={styles.avatarCircle}>
+                        {(participantNames[remote.socketId] || "P").charAt(0).toUpperCase()}
+                    </div>
+                </div>
+            )}
+            {remote.audioOff && (
+                <div className={styles.tileMicOffIcon}>
+                    <MicOffIcon fontSize="small" />
+                </div>
+            )}
+        </>
+    );
 
     return (
         <div>
@@ -640,7 +743,7 @@ export default function VideoMeetComponent() {
                                         ></video>
                                         <div className={styles.spotlightBadge}>
                                             <ScreenShareIcon fontSize="small" />
-                                            <span>{isLocalSharing ? "You are presenting your screen" : "Participant is presenting their screen"}</span>
+                                            <span>{isLocalSharing ? "You are presenting your screen" : `${participantNames[screenSharingId] || "Participant"} is presenting their screen`}</span>
                                         </div>
                                     </div>
 
@@ -680,8 +783,9 @@ export default function VideoMeetComponent() {
                                                     autoPlay
                                                 >
                                                 </video>
+                                                {remoteStatusOverlays(video)}
                                                 <div className={styles.tileLabel}>
-                                                    <span>Participant</span>
+                                                    <span>{participantNames[video.socketId] || "Participant"}</span>
                                                 </div>
                                             </div>
                                         ))}
@@ -724,8 +828,9 @@ export default function VideoMeetComponent() {
                                                 autoPlay
                                             >
                                             </video>
+                                            {remoteStatusOverlays(video)}
                                             <div className={styles.tileLabel}>
-                                                <span>Participant</span>
+                                                <span>{participantNames[video.socketId] || "Participant"}</span>
                                             </div>
                                         </div>
                                     ))}

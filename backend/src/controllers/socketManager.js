@@ -1,13 +1,32 @@
 import { Server } from "socket.io"
+import { registerSfuHandlers } from "../sfu/signaling.js"
+import { removePeer as removeSfuPeer } from "../sfu/rooms.js"
 
 
 let connections = {}
 let messages = {}
-let timeOnline = {}
 // Tracks who (if anyone) is currently screen-sharing in each room, so that
 // a participant who joins mid-share (or refreshes) can be told immediately
 // instead of only finding out on the next toggle.
 let screenShares = {}
+// Display name for each connected socket, so every tile can show who it is.
+let participantNames = {}
+
+const MAX_NAME_LENGTH = 50
+
+const cleanDisplayName = (name) => {
+    if (typeof name !== "string") return "Participant"
+    const trimmed = name.trim().slice(0, MAX_NAME_LENGTH)
+    return trimmed || "Participant"
+}
+
+const namesForRoom = (room) => {
+    const names = {}
+    connections[room].forEach((id) => {
+        names[id] = participantNames[id] || "Participant"
+    })
+    return names
+}
 
 // Shared by chat-message and screen-share-toggle: finds which room a given
 // socket currently belongs to.
@@ -34,23 +53,26 @@ export const connectToSocket = (server) => {
 
     io.on("connection", (socket) => {
 
-        console.log("SOMETHING CONNECTED")
+        // SFU events use the same meeting room this socket joined via join-call.
+        registerSfuHandlers(io, socket, (socketId) => {
+            const [room, found] = findRoomForSocket(socketId)
+            return found ? room : null
+        })
 
-        socket.on("join-call", (path) => {
+        socket.on("join-call", (path, displayName) => {
+
+            if (typeof path !== "string" || path.length === 0) return
 
             if (connections[path] === undefined) {
                 connections[path] = []
             }
             connections[path].push(socket.id)
 
-            timeOnline[socket.id] = new Date();
+            participantNames[socket.id] = cleanDisplayName(displayName)
 
-            // connections[path].forEach(elem => {
-            //     io.to(elem)
-            // })
-
+            const names = namesForRoom(path)
             for (let a = 0; a < connections[path].length; a++) {
-                io.to(connections[path][a]).emit("user-joined", socket.id, connections[path])
+                io.to(connections[path][a]).emit("user-joined", socket.id, connections[path], names)
             }
 
             if (messages[path] !== undefined) {
@@ -71,6 +93,11 @@ export const connectToSocket = (server) => {
         })
 
         socket.on("signal", (toId, message) => {
+            // Only relay WebRTC setup messages between two people in the same
+            // room, so nobody can push signals to a socket in another meeting.
+            const [room, found] = findRoomForSocket(socket.id);
+            if (!found || !connections[room].includes(toId)) return
+
             io.to(toId).emit("signal", socket.id, message);
         })
 
@@ -84,7 +111,6 @@ export const connectToSocket = (server) => {
                 }
 
                 messages[matchingRoom].push({ 'sender': sender, "data": data, "socket-id-sender": socket.id })
-                console.log("message", matchingRoom, ":", sender, data)
 
                 connections[matchingRoom].forEach((elem) => {
                     io.to(elem).emit("chat-message", data, sender, socket.id)
@@ -117,8 +143,6 @@ export const connectToSocket = (server) => {
 
         socket.on("disconnect", () => {
 
-            var diffTime = Math.abs(timeOnline[socket.id] - new Date())
-
             var key
 
             for (const [k, v] of JSON.parse(JSON.stringify(Object.entries(connections)))) {
@@ -142,13 +166,22 @@ export const connectToSocket = (server) => {
                             delete screenShares[key]
                         }
 
+                        // Last person left: forget the whole room, including
+                        // its chat, so a later meeting reusing this code
+                        // starts clean and server memory doesn't keep growing.
                         if (connections[key].length === 0) {
                             delete connections[key]
+                            delete messages[key]
+                            delete screenShares[key]
                         }
                     }
                 }
 
             }
+
+            delete participantNames[socket.id]
+
+            removeSfuPeer(socket.id).catch((e) => console.error("SFU cleanup failed:", e.message))
 
 
         })

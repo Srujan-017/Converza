@@ -1,0 +1,913 @@
+{
+  "label": "mesh-baseline",
+  "date": "2026-10-17T15:48:05.214Z",
+  "url": "http://localhost:3000",
+  "machine": {
+    "cpu": "AMD Ryzen 5 7520U with Radeon Graphics",
+    "logicalCores": 8,
+    "memoryGb": 7.3,
+    "platform": "Windows_NT 10.0.26200"
+  },
+  "settleSeconds": 20,
+  "windowSeconds": 15,
+  "runs": [
+    {
+      "summary": {
+        "participants": 2,
+        "expectedRemoteTilesEach": 1,
+        "remoteTilesSeen": [
+          1,
+          1
+        ],
+        "peerConnectionsCreatedEach": [
+          3,
+          2
+        ],
+        "connectedPeerConnectionsEach": [
+          1,
+          1
+        ],
+        "avgVideoUploadsEach": 1,
+        "avgUploadMbpsEach": 1.73,
+        "avgDownloadMbpsEach": 1.73,
+        "avgSentFps": 30,
+        "avgReceivedFps": 30,
+        "avgSentHeightPx": 480,
+        "uploadLimitedBy": {
+          "none": 2
+        },
+        "freezesInWindow": 0,
+        "frozenSecondsInWindow": 0,
+        "machineCpuPercent": 45.7,
+        "machineMemoryUsedGb": 6.67,
+        "machineCpuPercentBeforeTest": 38.6,
+        "machineMemoryUsedGbBeforeTest": 6.45
+      },
+      "participants": [
+        {
+          "peerConnectionsCreated": 3,
+          "connectionStates": {
+            "new": 2,
+            "connected": 1
+          },
+          "remoteTiles": 1,
+          "participantLabel": "2 participants",
+          "activeVideoUploads": 1,
+          "activeVideoDownloads": 1,
+          "uploadKbps": 1725.7294288388302,
+          "downloadKbps": 1729.8171600521196,
+          "sentFps": [
+            29.962846070824554
+          ],
+          "receivedFps": [
+            30.029430173204165
+          ],
+          "sentHeights": [
+            480
+          ],
+          "limitations": {
+            "none": 1
+          },
+          "newFreezes": 0,
+          "freezeSeconds": 0
+        },
+        {
+          "peerConnectionsCreated": 2,
+          "connectionStates": {
+            "connected": 1,
+            "new": 1
+          },
+          "remoteTiles": 1,
+          "participantLabel": "2 participants",
+          "activeVideoUploads": 1,
+          "activeVideoDownloads": 1,
+          "uploadKbps": 1733.7454308153394,
+          "downloadKbps": 1729.6850010958551,
+          "sentFps": [
+            30.028430465159968
+          ],
+          "receivedFps": [
+            30.028430465159968
+          ],
+          "sentHeights": [
+            480
+          ],
+          "limitations": {
+            "none": 1
+          },
+          "newFreezes": 0,
+          "freezeSeconds": 0
+        }
+      ]
+    },
+    {
+      "summary": {
+        "participants": 4,
+        "expectedRemoteTilesEach": 3,
+        "remoteTilesSeen": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "peerConnectionsCreatedEach": [
+          10,
+          9,
+          7,
+          4
+        ],
+        "connectedPeerConnectionsEach": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "avgVideoUploadsEach": 3,
+        "avgUploadMbpsEach": 5.03,
+        "avgDownloadMbpsEach": 5.04,
+        "avgSentFps": 28,
+        "avgReceivedFps": 27.8,
+        "avgSentHeightPx": 480,
+        "uploadLimitedBy": {
+          "none": 12
+        },
+        "freezesInWindow": 1,
+        "frozenSecondsInWindow": 0.2,
+        "machineCpuPercent": 99.8,
+        "machineMemoryUsedGb": 7.01,
+        "machineCpuPercentBeforeTest": 37.3,
+        "machineMemoryUsedGbBeforeTest": 6.2
+      },
+      "participants": [
+        {
+          "peerConnectionsCreated": 10,
+          "connectionStates": {
+            "new": 7,
+            "connected": 3
+          },
+          "remoteTiles": 3,
+          "participantLabel": "4 participants",
+          "activeVideoUploads": 3,
+          "activeVideoDownloads": 3,
+          "uploadKbps": 4995.31116242626,
+          "downloadKbps": 5048.631441073332,
+          "sentFps": [
+            28.116089680447104,
+            28.04993417531664,
+            27.388379124012
+          ],
+          "receivedFps": [
+            28.314556195838495,
+            27.785312154794784,
+            27.851467659925248
+          ],
+          "sentHeights": [
+            480,
+            480,
+            480
+          ],
+          "limitations": {
+            "none": 3
+          },
+          "newFreezes": 0,
+          "freezeSeconds": 0
+        },
+        {
+          "peerConnectionsCreated": 9,
+          "connectionStates": {
+            "connected": 3,
+            "new": 6
+          },
+          "remoteTiles": 3,
+          "participantLabel": "4 participants",
+          "activeVideoUploads": 3,
+          "activeVideoDownloads": 3,
+          "uploadKbps": 5051.43998467232,
+          "downloadKbps": 5047.982910407909,
+          "sentFps": [
+            28.30631667370024,
+            28.041771658058185,
+            27.84336289632664
+          ],
+          "receivedFps": [
+            27.909499150237153,
+            27.909499150237153,
+            27.97563540414767
+          ],
+          "sentHeights": [
+            480,
+            480,
+            480
+          ],
+          "limitations": {
+            "none": 3
+          },
+          "newFreezes": 1,
+          "freezeSeconds": 0.19
+        },
+        {
+          "peerConnectionsCreated": 7,
+          "connectionStates": {
+            "connected": 3,
+            "new": 4
+          },
+          "remoteTiles": 3,
+          "participantLabel": "4 participants",
+          "activeVideoUploads": 3,
+          "activeVideoDownloads": 3,
+          "uploadKbps": 5021.332539761267,
+          "downloadKbps": 5050.660318090137,
+          "sentFps": [
+            27.841153324736304,
+            28.03954634130212,
+            27.907284330258243
+          ],
+          "receivedFps": [
+            27.97341533578018,
+            27.907284330258243,
+            27.708891313692426
+          ],
+          "sentHeights": [
+            480,
+            480,
+            480
+          ],
+          "limitations": {
+            "none": 3
+          },
+          "newFreezes": 0,
+          "freezeSeconds": 0
+        },
+        {
+          "peerConnectionsCreated": 4,
+          "connectionStates": {
+            "connected": 3,
+            "new": 1
+          },
+          "remoteTiles": 3,
+          "participantLabel": "4 participants",
+          "activeVideoUploads": 3,
+          "activeVideoDownloads": 3,
+          "uploadKbps": 5057.538533054421,
+          "downloadKbps": 5001.7624597403465,
+          "sentFps": [
+            28.22326260915762,
+            28.15685493243019,
+            28.09044725570276
+          ],
+          "receivedFps": [
+            27.227147458246172,
+            27.75840887206561,
+            27.49277816515589
+          ],
+          "sentHeights": [
+            480,
+            480,
+            480
+          ],
+          "limitations": {
+            "none": 3
+          },
+          "newFreezes": 0,
+          "freezeSeconds": 0
+        }
+      ]
+    },
+    {
+      "summary": {
+        "participants": 6,
+        "expectedRemoteTilesEach": 5,
+        "remoteTilesSeen": [
+          5,
+          5,
+          5,
+          5,
+          5,
+          5
+        ],
+        "peerConnectionsCreatedEach": [
+          21,
+          20,
+          18,
+          15,
+          11,
+          6
+        ],
+        "connectedPeerConnectionsEach": [
+          5,
+          5,
+          5,
+          5,
+          5,
+          5
+        ],
+        "avgVideoUploadsEach": 5,
+        "avgUploadMbpsEach": 0.93,
+        "avgDownloadMbpsEach": 1.09,
+        "avgSentFps": 13,
+        "avgReceivedFps": 15.6,
+        "avgSentHeightPx": 256,
+        "uploadLimitedBy": {
+          "bandwidth": 30
+        },
+        "freezesInWindow": 102,
+        "frozenSecondsInWindow": 88.6,
+        "machineCpuPercent": 94.9,
+        "machineMemoryUsedGb": 6.21,
+        "machineCpuPercentBeforeTest": 38.8,
+        "machineMemoryUsedGbBeforeTest": 6.21
+      },
+      "participants": [
+        {
+          "peerConnectionsCreated": 21,
+          "connectionStates": {
+            "new": 16,
+            "connected": 5
+          },
+          "remoteTiles": 5,
+          "participantLabel": "6 participants",
+          "activeVideoUploads": 5,
+          "activeVideoDownloads": 4,
+          "uploadKbps": 1102.8193069160593,
+          "downloadKbps": 311.3802842992362,
+          "sentFps": [
+            7.540729863286553,
+            9.988159731195347,
+            14.089258428772244,
+            7.408436356913105,
+            29.3030116617188
+          ],
+          "receivedFps": [
+            10.18659999075552,
+            10.451187003502415,
+            11.707975314050175,
+            9.789719471635175
+          ],
+          "sentHeights": [
+            240,
+            240,
+            240,
+            240,
+            360
+          ],
+          "limitations": {
+            "bandwidth": 5
+          },
+          "newFreezes": 18,
+          "freezeSeconds": 5.982
+        },
+        {
+          "peerConnectionsCreated": 20,
+          "connectionStates": {
+            "connected": 5,
+            "new": 15
+          },
+          "remoteTiles": 5,
+          "participantLabel": "6 participants",
+          "activeVideoUploads": 5,
+          "activeVideoDownloads": 4,
+          "uploadKbps": 1548.5144248010242,
+          "downloadKbps": 586.7603048552206,
+          "sentFps": [
+            7.182474761570352,
+            7.847518720975014,
+            15.229506670366765,
+            7.315483553451284,
+            29.06242102598374
+          ],
+          "receivedFps": [
+            3.5247329848447095,
+            17.623664924223547,
+            16.094063817592826,
+            8.579067076320143
+          ],
+          "sentHeights": [
+            240,
+            240,
+            240,
+            240,
+            360
+          ],
+          "limitations": {
+            "bandwidth": 5
+          },
+          "newFreezes": 19,
+          "freezeSeconds": 24.002999999999997
+        },
+        {
+          "peerConnectionsCreated": 18,
+          "connectionStates": {
+            "connected": 5,
+            "new": 13
+          },
+          "remoteTiles": 5,
+          "participantLabel": "6 participants",
+          "activeVideoUploads": 5,
+          "activeVideoDownloads": 4,
+          "uploadKbps": 378.26009823461146,
+          "downloadKbps": 663.4467054124808,
+          "sentFps": [
+            7.281585532140017,
+            8.009744085354018,
+            7.3477817642503815,
+            8.340725245905839,
+            18.733533687232953
+          ],
+          "receivedFps": [
+            19.263103544115864,
+            18.071571366129316,
+            15.556114545935491,
+            13.636423814734941
+          ],
+          "sentHeights": [
+            240,
+            240,
+            240,
+            240,
+            240
+          ],
+          "limitations": {
+            "bandwidth": 5
+          },
+          "newFreezes": 14,
+          "freezeSeconds": 8.947
+        },
+        {
+          "peerConnectionsCreated": 15,
+          "connectionStates": {
+            "connected": 5,
+            "new": 10
+          },
+          "remoteTiles": 5,
+          "participantLabel": "6 participants",
+          "activeVideoUploads": 5,
+          "activeVideoDownloads": 5,
+          "uploadKbps": 680.0515692218573,
+          "downloadKbps": 1411.232835044532,
+          "sentFps": [
+            6.942011067516245,
+            7.5370405875890665,
+            7.272583023112257,
+            18.247571948899846,
+            21.354948331502353
+          ],
+          "receivedFps": [
+            22.08220663381358,
+            22.41277858940959,
+            18.578143904495857,
+            21.354948331502353,
+            22.08220663381358
+          ],
+          "sentHeights": [
+            240,
+            240,
+            240,
+            240,
+            240
+          ],
+          "limitations": {
+            "bandwidth": 5
+          },
+          "newFreezes": 14,
+          "freezeSeconds": 5.764000000000001
+        },
+        {
+          "peerConnectionsCreated": 11,
+          "connectionStates": {
+            "connected": 5,
+            "new": 6
+          },
+          "remoteTiles": 5,
+          "participantLabel": "6 participants",
+          "activeVideoUploads": 5,
+          "activeVideoDownloads": 5,
+          "uploadKbps": 720.5422204589038,
+          "downloadKbps": 1374.6954969252133,
+          "sentFps": [
+            7.00919129802288,
+            7.47206242147722,
+            5.951200158698671,
+            24.79666732791113,
+            6.14957349732196
+          ],
+          "receivedFps": [
+            7.47206242147722,
+            3.50459564901144,
+            6.943066851815116,
+            20.763076109237588,
+            12.629769225682736
+          ],
+          "sentHeights": [
+            240,
+            240,
+            240,
+            240,
+            240
+          ],
+          "limitations": {
+            "bandwidth": 5
+          },
+          "newFreezes": 17,
+          "freezeSeconds": 28.273999999999997
+        },
+        {
+          "peerConnectionsCreated": 6,
+          "connectionStates": {
+            "connected": 5,
+            "new": 1
+          },
+          "remoteTiles": 5,
+          "participantLabel": "6 participants",
+          "activeVideoUploads": 5,
+          "activeVideoDownloads": 5,
+          "uploadKbps": 1149.026370772464,
+          "downloadKbps": 2163.044938757723,
+          "sentFps": [
+            24.33411802035731,
+            19.96984685366279,
+            22.085857116302556,
+            20.43272409861524,
+            6.810908032871747
+          ],
+          "receivedFps": [
+            31.27727669464404,
+            31.21115137393655,
+            20.234348136492763,
+            20.763350702152703,
+            4.6948977702319805
+          ],
+          "sentHeights": [
+            360,
+            240,
+            360,
+            240,
+            240
+          ],
+          "limitations": {
+            "bandwidth": 5
+          },
+          "newFreezes": 20,
+          "freezeSeconds": 15.639
+        }
+      ]
+    },
+    {
+      "summary": {
+        "participants": 8,
+        "expectedRemoteTilesEach": 7,
+        "remoteTilesSeen": [
+          7,
+          7,
+          7,
+          7,
+          7,
+          7,
+          5,
+          7
+        ],
+        "peerConnectionsCreatedEach": [
+          36,
+          35,
+          33,
+          30,
+          26,
+          21,
+          15,
+          8
+        ],
+        "connectedPeerConnectionsEach": [
+          5,
+          5,
+          5,
+          5,
+          3,
+          7,
+          2,
+          2
+        ],
+        "avgVideoUploadsEach": 4.5,
+        "avgUploadMbpsEach": 0.42,
+        "avgDownloadMbpsEach": 0.33,
+        "avgSentFps": 10.8,
+        "avgReceivedFps": 8.2,
+        "avgSentHeightPx": 253,
+        "uploadLimitedBy": {
+          "bandwidth": 36
+        },
+        "freezesInWindow": 112,
+        "frozenSecondsInWindow": 125.1,
+        "machineCpuPercent": 95.6,
+        "machineMemoryUsedGb": 7.03,
+        "machineCpuPercentBeforeTest": 42.8,
+        "machineMemoryUsedGbBeforeTest": 5.42
+      },
+      "participants": [
+        {
+          "peerConnectionsCreated": 36,
+          "connectionStates": {
+            "new": 29,
+            "connected": 5,
+            "failed": 1,
+            "connecting": 1
+          },
+          "remoteTiles": 7,
+          "participantLabel": "8 participants",
+          "activeVideoUploads": 5,
+          "activeVideoDownloads": 4,
+          "uploadKbps": 368.3092428952058,
+          "downloadKbps": 475.4962719036652,
+          "sentFps": [
+            7.76825373642185,
+            7.1043004256165645,
+            7.30348641885815,
+            7.170695756697093,
+            20.38336664172229
+          ],
+          "receivedFps": [
+            11.088020290448283,
+            1.8590692702548017,
+            3.7181385405096035,
+            0.7967439729663437
+          ],
+          "sentHeights": [
+            240,
+            240,
+            240,
+            240,
+            240
+          ],
+          "limitations": {
+            "bandwidth": 5
+          },
+          "newFreezes": 12,
+          "freezeSeconds": 27.799
+        },
+        {
+          "peerConnectionsCreated": 35,
+          "connectionStates": {
+            "connected": 5,
+            "new": 28,
+            "failed": 1,
+            "connecting": 1
+          },
+          "remoteTiles": 7,
+          "participantLabel": "8 participants",
+          "activeVideoUploads": 5,
+          "activeVideoDownloads": 4,
+          "uploadKbps": 460.3011232367446,
+          "downloadKbps": 280.53479911796063,
+          "sentFps": [
+            7.2359860856520015,
+            7.036830505312955,
+            6.970445311866607,
+            11.086327305540221,
+            29.873337050856886
+          ],
+          "receivedFps": [
+            14.14004620407226,
+            5.642741442939634,
+            5.576356249493285,
+            9.293927082488809
+          ],
+          "sentHeights": [
+            240,
+            240,
+            240,
+            240,
+            360
+          ],
+          "limitations": {
+            "bandwidth": 5
+          },
+          "newFreezes": 14,
+          "freezeSeconds": 9.471000000000002
+        },
+        {
+          "peerConnectionsCreated": 33,
+          "connectionStates": {
+            "connected": 5,
+            "new": 26,
+            "connecting": 2
+          },
+          "remoteTiles": 7,
+          "participantLabel": "8 participants",
+          "activeVideoUploads": 5,
+          "activeVideoDownloads": 4,
+          "uploadKbps": 521.4288079807411,
+          "downloadKbps": 135.4021420199649,
+          "sentFps": [
+            7.550718974173893,
+            6.954609581475954,
+            6.888375204509517,
+            7.153312712375267,
+            15.035203571381349
+          ],
+          "receivedFps": [
+            5.36498453428145,
+            7.484484597207455,
+            4.437703256751323,
+            0.6623437696643766
+          ],
+          "sentHeights": [
+            240,
+            240,
+            240,
+            240,
+            240
+          ],
+          "limitations": {
+            "bandwidth": 5
+          },
+          "newFreezes": 12,
+          "freezeSeconds": 11.049999999999999
+        },
+        {
+          "peerConnectionsCreated": 30,
+          "connectionStates": {
+            "connected": 5,
+            "new": 23,
+            "connecting": 2
+          },
+          "remoteTiles": 7,
+          "participantLabel": "8 participants",
+          "activeVideoUploads": 5,
+          "activeVideoDownloads": 5,
+          "uploadKbps": 342.18006836358813,
+          "downloadKbps": 442.4305578601533,
+          "sentFps": [
+            6.969103640526997,
+            6.836358809278864,
+            6.969103640526997,
+            8.69478644675273,
+            13.672717618557728
+          ],
+          "receivedFps": [
+            15.730262502903793,
+            6.172634653038197,
+            11.416055487339461,
+            6.106262237414131,
+            18.252414296618326
+          ],
+          "sentHeights": [
+            240,
+            240,
+            240,
+            240,
+            240
+          ],
+          "limitations": {
+            "bandwidth": 5
+          },
+          "newFreezes": 17,
+          "freezeSeconds": 7.523999999999997
+        },
+        {
+          "peerConnectionsCreated": 26,
+          "connectionStates": {
+            "disconnected": 2,
+            "connected": 3,
+            "new": 20,
+            "connecting": 1
+          },
+          "remoteTiles": 7,
+          "participantLabel": "8 participants",
+          "activeVideoUploads": 5,
+          "activeVideoDownloads": 5,
+          "uploadKbps": 525.462594712636,
+          "downloadKbps": 327.89597326539393,
+          "sentFps": [
+            6.816001058796282,
+            7.1468748966019255,
+            7.279224431724184,
+            7.014525361479668,
+            22.300896668100453
+          ],
+          "receivedFps": [
+            5.095457102206929,
+            2.6469907024451578,
+            0,
+            7.676273037090957,
+            2.6469907024451578
+          ],
+          "sentHeights": [
+            240,
+            240,
+            240,
+            240,
+            240
+          ],
+          "limitations": {
+            "bandwidth": 5
+          },
+          "newFreezes": 20,
+          "freezeSeconds": 43.94
+        },
+        {
+          "peerConnectionsCreated": 21,
+          "connectionStates": {
+            "connected": 7,
+            "new": 14
+          },
+          "remoteTiles": 7,
+          "participantLabel": "8 participants",
+          "activeVideoUploads": 7,
+          "activeVideoDownloads": 5,
+          "uploadKbps": 830.4007433463861,
+          "downloadKbps": 509.7933231565673,
+          "sentFps": [
+            21.238468175482843,
+            23.030463927789206,
+            11.150195792128493,
+            6.637021304838388,
+            8.163536204951217,
+            6.1724298134997015,
+            29.667485232627595
+          ],
+          "receivedFps": [
+            15.928851131612133,
+            16.327072409902435,
+            16.858034114289506,
+            3.25214043937081,
+            3.8494723568062654
+          ],
+          "sentHeights": [
+            360,
+            360,
+            240,
+            240,
+            240,
+            240,
+            360
+          ],
+          "limitations": {
+            "bandwidth": 7
+          },
+          "newFreezes": 14,
+          "freezeSeconds": 7.825000000000002
+        },
+        {
+          "peerConnectionsCreated": 15,
+          "connectionStates": {
+            "connecting": 5,
+            "connected": 2,
+            "new": 8
+          },
+          "remoteTiles": 5,
+          "participantLabel": "6 participants",
+          "activeVideoUploads": 2,
+          "activeVideoDownloads": 2,
+          "uploadKbps": 121.43677131158262,
+          "downloadKbps": 210.28354534402655,
+          "sentFps": [
+            7.033888745069921,
+            6.237599453175212
+          ],
+          "receivedFps": [
+            17.12021977573622,
+            4.844093192359473
+          ],
+          "sentHeights": [
+            240,
+            240
+          ],
+          "limitations": {
+            "bandwidth": 2
+          },
+          "newFreezes": 17,
+          "freezeSeconds": 12.577
+        },
+        {
+          "peerConnectionsCreated": 8,
+          "connectionStates": {
+            "connecting": 4,
+            "new": 2,
+            "connected": 2
+          },
+          "remoteTiles": 7,
+          "participantLabel": "8 participants",
+          "activeVideoUploads": 2,
+          "activeVideoDownloads": 2,
+          "uploadKbps": 160.85255946944952,
+          "downloadKbps": 270.6035426056185,
+          "sentFps": [
+            13.992691968504323,
+            7.228452249132565
+          ],
+          "receivedFps": [
+            27.255907104527378,
+            4.443177070567724
+          ],
+          "sentHeights": [
+            240,
+            240
+          ],
+          "limitations": {
+            "bandwidth": 2
+          },
+          "newFreezes": 6,
+          "freezeSeconds": 4.8660000000000005
+        }
+      ]
+    }
+  ]
+}
