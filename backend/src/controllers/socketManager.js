@@ -1,4 +1,6 @@
 import { Server } from "socket.io"
+import { registerSfuHandlers } from "../sfu/signaling.js"
+import { removePeer as removeSfuPeer } from "../sfu/rooms.js"
 
 
 let connections = {}
@@ -53,6 +55,12 @@ export const connectToSocket = (server) => {
     io.on("connection", (socket) => {
 
         console.log("SOMETHING CONNECTED")
+
+        // SFU events use the same meeting room this socket joined via join-call.
+        registerSfuHandlers(io, socket, (socketId) => {
+            const [room, found] = findRoomForSocket(socketId)
+            return found ? room : null
+        })
 
         socket.on("join-call", (path, displayName) => {
 
@@ -184,6 +192,8 @@ export const connectToSocket = (server) => {
 
             delete timeOnline[socket.id]
             delete participantNames[socket.id]
+
+            removeSfuPeer(socket.id).catch((e) => console.error("SFU cleanup failed:", e.message))
 
 
         })

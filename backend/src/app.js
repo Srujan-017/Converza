@@ -8,6 +8,7 @@ import { Server } from "socket.io";
 
 import mongoose from "mongoose";
 import { connectToSocket } from "./controllers/socketManager.js";
+import { startWorkers } from "./sfu/workers.js";
 
 import cors from "cors";
 import userRoutes from "./routes/users.routes.js";
@@ -33,6 +34,10 @@ const start = async () => {
     const connectionDb = await mongoose.connect(process.env.MONGODB_URI);
 
     console.log(`MONGO Connected DB Host: ${connectionDb.connection.host}`)
+
+    // If mediasoup can't start, the app still runs; only SFU calls are unavailable.
+    await startWorkers();
+
     server.listen(app.get("port"), () => {
         console.log(`LISTENING ON PORT ${app.get("port")}`)
     });

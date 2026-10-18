@@ -6,7 +6,8 @@
   "description": "Minimal mediasoup SFU experiment, separate from the Converza app",
   "scripts": {
     "build": "esbuild client.js --bundle --outfile=public/bundle.js --format=iife",
-    "start": "npm run build && node server.mjs"
+    "start": "npm run build && node server.mjs",
+    "check-backend": "esbuild backend-check/client.js --bundle --outfile=backend-check/public/bundle.js --format=iife && node backend-check/check.mjs"
   },
   "dependencies": {
     "express": "^5.3.0",
