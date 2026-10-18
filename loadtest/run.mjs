@@ -51,6 +51,8 @@ const snapshot = async () => {
         const report = await pc.getStats();
         report.forEach((r) => {
             if (r.type !== "outbound-rtp" && r.type !== "inbound-rtp") return;
+            // mediasoup's hidden bandwidth-probe stream, not anyone's video.
+            if (r.trackIdentifier === "probator") return;
             streams.push({
                 id: `${i}:${r.id}`,
                 dir: r.type === "outbound-rtp" ? "out" : "in",

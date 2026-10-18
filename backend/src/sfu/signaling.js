@@ -19,6 +19,11 @@ const MAX_TRANSPORTS_PER_PEER = 4;
 // getMeetingId(socketId) returns the meeting this socket joined through the
 // existing "join-call", so the SFU room is always the same meeting room.
 export const registerSfuHandlers = (io, socket, getMeetingId) => {
+    // Asked before join-call, so the browser can pick SFU or peer-to-peer.
+    socket.on("sfu:status", (reply) => {
+        if (typeof reply === "function") reply({ available: sfuAvailable() });
+    });
+
     const handle = (event, fn) => socket.on(event, async (data, reply) => {
         if (typeof reply !== "function") return;
         try {

@@ -34,6 +34,20 @@ Results are printed and saved to `results/<label>-<date>.json`.
 
 Set `CHROME_PATH` if Chrome is not at `C:/Program Files/Google/Chrome/Application/chrome.exe`.
 
+## Feature checklist
+
+`features.mjs` runs the meeting checklist with fake participants: names,
+live video, chat, camera and mic toggles (SFU only), screen share, late
+joiner, refresh, leave, and separate meetings staying separate.
+
+```bash
+node features.mjs --mode sfu
+node features.mjs --mode mesh
+```
+
+`--mode` is what you expect the page to use: `sfu` when the backend's SFU
+is running, `mesh` when it isn't (the page then falls back to peer-to-peer).
+
 ## Reading the results
 
 All participants run on one computer, so its CPU is shared by everyone, and
