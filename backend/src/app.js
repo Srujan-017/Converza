@@ -8,7 +8,7 @@ import { Server } from "socket.io";
 
 import mongoose from "mongoose";
 import { connectToSocket } from "./controllers/socketManager.js";
-import { startWorkers } from "./sfu/workers.js";
+import { startWorkers, sfuAvailable } from "./sfu/workers.js";
 
 import cors from "cors";
 import userRoutes from "./routes/users.routes.js";
@@ -24,6 +24,15 @@ app.use(express.json({ limit: "40kb" }));
 app.use(express.urlencoded({ limit: "40kb", extended: true }));
 
 app.use("/api/v1/users", userRoutes);
+
+// Quick check after a deploy: is the API up, is MongoDB connected, is the SFU running?
+app.get("/api/v1/health", (_req, res) => {
+    res.json({
+        status: "ok",
+        database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+        sfu: sfuAvailable() ? "running" : "unavailable",
+    });
+});
 
 const start = async () => {
     if (!process.env.MONGODB_URI) {

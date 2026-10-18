@@ -52,6 +52,8 @@ const browser = await puppeteer.launch({
         "--disable-renderer-backgrounding",
         "--disable-backgrounding-occluded-windows",
         "--mute-audio",
+        // Only for rehearsals with a self-signed certificate.
+        ...(process.env.IGNORE_CERT_ERRORS ? ["--ignore-certificate-errors"] : []),
     ],
 });
 
