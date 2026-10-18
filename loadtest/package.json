@@ -1,0 +1,13 @@
+{
+  "name": "converza-loadtest",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Joins N fake participants (headless Chrome, fake camera) to one Converza meeting and records WebRTC stats",
+  "scripts": {
+    "start": "node run.mjs"
+  },
+  "dependencies": {
+    "puppeteer-core": "^24.0.0"
+  }
+}
