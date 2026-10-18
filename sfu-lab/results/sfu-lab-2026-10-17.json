@@ -1,0 +1,193 @@
+{
+  "label": "sfu-lab",
+  "date": "2026-10-17T17:20:58.147Z",
+  "machine": {
+    "cpu": "AMD Ryzen 5 7520U with Radeon Graphics",
+    "logicalCores": 8,
+    "memoryGb": 7.3
+  },
+  "settleSeconds": 20,
+  "windowSeconds": 14,
+  "runs": [
+    {
+      "participants": 2,
+      "allConnected": true,
+      "remoteTilesSeen": [
+        1,
+        1
+      ],
+      "videoUploadsEach": [
+        1,
+        1
+      ],
+      "videoDownloadsEach": [
+        1,
+        1
+      ],
+      "avgUploadMbpsEach": 1.73,
+      "avgDownloadMbpsEach": 1.73,
+      "avgSentFps": 30,
+      "avgReceivedFps": 30,
+      "avgSentHeightPx": 480,
+      "uploadLimitedBy": [
+        "none",
+        "none"
+      ],
+      "freezesInWindow": 0,
+      "machineCpuPercent": 55.6,
+      "sfuWorkerCpuPercentOfOneCore": 5.3,
+      "serverRoom": {
+        "peers": 2,
+        "producers": 4,
+        "consumers": 4
+      }
+    },
+    {
+      "participants": 4,
+      "allConnected": true,
+      "remoteTilesSeen": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "videoUploadsEach": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "videoDownloadsEach": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "avgUploadMbpsEach": 1.73,
+      "avgDownloadMbpsEach": 5.18,
+      "avgSentFps": 30,
+      "avgReceivedFps": 30,
+      "avgSentHeightPx": 480,
+      "uploadLimitedBy": [
+        "none",
+        "none",
+        "none",
+        "none"
+      ],
+      "freezesInWindow": 0,
+      "machineCpuPercent": 69.9,
+      "sfuWorkerCpuPercentOfOneCore": 19,
+      "serverRoom": {
+        "peers": 4,
+        "producers": 8,
+        "consumers": 24
+      }
+    },
+    {
+      "participants": 6,
+      "allConnected": true,
+      "remoteTilesSeen": [
+        5,
+        5,
+        5,
+        5,
+        5,
+        5
+      ],
+      "videoUploadsEach": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "videoDownloadsEach": [
+        5,
+        5,
+        5,
+        5,
+        5,
+        5
+      ],
+      "avgUploadMbpsEach": 1.15,
+      "avgDownloadMbpsEach": 5.79,
+      "avgSentFps": 18.2,
+      "avgReceivedFps": 18.3,
+      "avgSentHeightPx": 480,
+      "uploadLimitedBy": [
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none"
+      ],
+      "freezesInWindow": 102,
+      "machineCpuPercent": 100,
+      "sfuWorkerCpuPercentOfOneCore": 40.9,
+      "serverRoom": {
+        "peers": 6,
+        "producers": 12,
+        "consumers": 60
+      }
+    },
+    {
+      "participants": 8,
+      "allConnected": true,
+      "remoteTilesSeen": [
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7
+      ],
+      "videoUploadsEach": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "videoDownloadsEach": [
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7
+      ],
+      "avgUploadMbpsEach": 0.4,
+      "avgDownloadMbpsEach": 3.47,
+      "avgSentFps": 23.7,
+      "avgReceivedFps": 17,
+      "avgSentHeightPx": 296,
+      "uploadLimitedBy": [
+        "bandwidth",
+        "bandwidth",
+        "bandwidth",
+        "bandwidth",
+        "bandwidth",
+        "bandwidth",
+        "bandwidth",
+        "bandwidth"
+      ],
+      "freezesInWindow": 105,
+      "machineCpuPercent": 99.5,
+      "sfuWorkerCpuPercentOfOneCore": 36.2,
+      "serverRoom": {
+        "peers": 8,
+        "producers": 16,
+        "consumers": 112
+      }
+    }
+  ]
+}
