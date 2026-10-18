@@ -81,6 +81,9 @@ export default function VideoMeetComponent() {
     // spotlight for that person's video instead of the regular grid.
     let [screenSharingId, setScreenSharingId] = useState(null)
 
+    // socketId -> display name for every remote participant, sent by the server.
+    let [participantNames, setParticipantNames] = useState({})
+
     // TODO
     // if(isChrome() === false) {
 
@@ -352,13 +355,18 @@ export default function VideoMeetComponent() {
             // Using the full href would make "abc123" and "abc123?guest=true"
             // land in different rooms, breaking multi-user synchronization.
             const meetingId = window.location.pathname.replace(/^\/+/, '');
-            socketRef.current.emit('join-call', meetingId)
+            socketRef.current.emit('join-call', meetingId, username)
             socketIdRef.current = socketRef.current.id
 
             socketRef.current.on('chat-message', addMessage)
 
             socketRef.current.on('user-left', (id) => {
                 setVideos((videos) => videos.filter((video) => video.socketId !== id))
+                setParticipantNames((names) => {
+                    const updated = { ...names }
+                    delete updated[id]
+                    return updated
+                })
                 // If the participant who left was the one being spotlighted,
                 // fall back to the regular grid instead of showing a dead tile.
                 setScreenSharingId((current) => (current === id ? null : current))
@@ -374,7 +382,11 @@ export default function VideoMeetComponent() {
                 })
             })
 
-            socketRef.current.on('user-joined', (id, clients) => {
+            socketRef.current.on('user-joined', (id, clients, names) => {
+                if (names) {
+                    setParticipantNames((current) => ({ ...current, ...names }))
+                }
+
                 clients.forEach((socketListId) => {
 
                     connections[socketListId] = new RTCPeerConnection(peerConfigConnections)
@@ -397,35 +409,27 @@ export default function VideoMeetComponent() {
                             ? event.streams[0]
                             : new MediaStream([event.track]);
 
-                        let videoExists = videoRef.current.find(video => video.socketId === socketListId);
+                        // Decide "update or add" inside the updater, against the latest
+                        // list. Checking videoRef outside it raced when the audio and
+                        // video ontrack events arrived before React applied the first
+                        // update, which produced a duplicate tile for the same person.
+                        setVideos(videos => {
+                            const videoExists = videos.some(video => video.socketId === socketListId);
 
-                        if (videoExists) {
-                            console.log("FOUND EXISTING");
-
-                            // Update the stream of the existing video
-                            setVideos(videos => {
-                                const updatedVideos = videos.map(video =>
+                            const updatedVideos = videoExists
+                                ? videos.map(video =>
                                     video.socketId === socketListId ? { ...video, stream: remoteStream } : video
-                                );
-                                videoRef.current = updatedVideos;
-                                return updatedVideos;
-                            });
-                        } else {
-                            // Create a new video
-                            console.log("CREATING NEW");
-                            let newVideo = {
-                                socketId: socketListId,
-                                stream: remoteStream,
-                                autoplay: true,
-                                playsinline: true
-                            };
+                                )
+                                : [...videos, {
+                                    socketId: socketListId,
+                                    stream: remoteStream,
+                                    autoplay: true,
+                                    playsinline: true
+                                }];
 
-                            setVideos(videos => {
-                                const updatedVideos = [...videos, newVideo];
-                                videoRef.current = updatedVideos;
-                                return updatedVideos;
-                            });
-                        }
+                            videoRef.current = updatedVideos;
+                            return updatedVideos;
+                        });
                     };
 
 
@@ -640,7 +644,7 @@ export default function VideoMeetComponent() {
                                         ></video>
                                         <div className={styles.spotlightBadge}>
                                             <ScreenShareIcon fontSize="small" />
-                                            <span>{isLocalSharing ? "You are presenting your screen" : "Participant is presenting their screen"}</span>
+                                            <span>{isLocalSharing ? "You are presenting your screen" : `${participantNames[screenSharingId] || "Participant"} is presenting their screen`}</span>
                                         </div>
                                     </div>
 
@@ -681,7 +685,7 @@ export default function VideoMeetComponent() {
                                                 >
                                                 </video>
                                                 <div className={styles.tileLabel}>
-                                                    <span>Participant</span>
+                                                    <span>{participantNames[video.socketId] || "Participant"}</span>
                                                 </div>
                                             </div>
                                         ))}
@@ -725,7 +729,7 @@ export default function VideoMeetComponent() {
                                             >
                                             </video>
                                             <div className={styles.tileLabel}>
-                                                <span>Participant</span>
+                                                <span>{participantNames[video.socketId] || "Participant"}</span>
                                             </div>
                                         </div>
                                     ))}
