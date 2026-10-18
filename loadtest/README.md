@@ -30,9 +30,20 @@ Results are printed and saved to `results/<label>-<date>.json`.
 | `--settle` | `20` | Seconds to wait after everyone joins, so video quality stabilises |
 | `--window` | `15` | Seconds over which stats are measured |
 | `--label` | `run` | Name used for the results file |
+| `--repeat` | `1` | Run every size this many times (sizes are interleaved) |
+| `--api` | same as `--url` | Backend address for `/api/v1/sfu/stats`, to record SFU server CPU. Locally: `http://localhost:8000`. Behind Nginx the default is right. |
 | `--show` | off | Open visible Chrome windows so you can watch the bots (uses more CPU, so don't use it for real measurements) |
 
 Set `CHROME_PATH` if Chrome is not at `C:/Program Files/Google/Chrome/Application/chrome.exe`.
+
+## Comparison report
+
+```bash
+node report.mjs results/phase6-mesh-<date>.json results/phase6-sfu-<date>.json --out results/REPORT.md
+```
+
+Each file becomes a column; with `--repeat`, values are the median across
+repeats with the range in brackets.
 
 ## Feature checklist
 

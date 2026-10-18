@@ -2,6 +2,9 @@
 // each participant's WebRTC stats over a fixed window.
 //
 // Usage: node run.mjs --url http://localhost:3000 --sizes 2,4,6,8 --label mesh
+//        [--repeat 3] [--api http://localhost:8000]
+// --api is where the backend answers /api/v1/sfu/stats (default: same as --url,
+// which is right for a deployed server behind Nginx).
 import os from "node:os";
 import { mkdir, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -20,6 +23,8 @@ const SIZES = (args.sizes || "2,4,6,8").split(",").map(Number);
 const SETTLE_SECONDS = Number(args.settle || 20);
 const WINDOW_SECONDS = Number(args.window || 15);
 const LABEL = args.label || "run";
+const REPEAT = Number(args.repeat || 1);
+const API_URL = (args.api || BASE_URL).replace(/\/+$/, "");
 const SHOW_BROWSER = process.argv.includes("--show");
 const CHROME_PATH = process.env.CHROME_PATH || "C:/Program Files/Google/Chrome/Application/chrome.exe";
 
@@ -127,6 +132,15 @@ const diffParticipant = (a, b) => {
     return result;
 };
 
+const fetchSfuStats = async () => {
+    try {
+        const res = await fetch(`${API_URL}/api/v1/sfu/stats`, { signal: AbortSignal.timeout(3000) });
+        return res.ok ? await res.json() : null;
+    } catch {
+        return null;
+    }
+};
+
 const avg = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
 const round = (x, d = 1) => Math.round(x * 10 ** d) / 10 ** d;
 
@@ -206,11 +220,23 @@ const runSize = async (n) => {
         console.log(`  [${n}] all joined, settling ${SETTLE_SECONDS}s...`);
         await sleep(SETTLE_SECONDS * 1000);
 
+        const sfu0 = await fetchSfuStats();
+        const windowStart = Date.now();
         const cpu0 = cpuTimes();
         const first = await Promise.all(pages.map((p) => p.evaluate(snapshot)));
         await sleep(WINDOW_SECONDS * 1000);
         const second = await Promise.all(pages.map((p) => p.evaluate(snapshot)));
         const cpu1 = cpuTimes();
+        const sfu1 = await fetchSfuStats();
+        const sfuServer = sfu0 && sfu1 && sfu1.workers > 0
+            ? {
+                // 100% = one CPU core busy forwarding media
+                sfuWorkerCpuPercentOfOneCore: round((100 * (sfu1.cpuMs - sfu0.cpuMs)) / (Date.now() - windowStart)),
+                sfuPeers: sfu1.peers,
+                sfuProducers: sfu1.producers,
+                sfuConsumers: sfu1.consumers,
+            }
+            : {};
 
         const cpuPercent = 100 * (1 - (cpu1.idle - cpu0.idle) / (cpu1.total - cpu0.total));
         const memUsedGb = (os.totalmem() - os.freemem()) / 1024 ** 3;
@@ -219,6 +245,7 @@ const runSize = async (n) => {
             ...summarise(n, participants, cpuPercent, memUsedGb),
             machineCpuPercentBeforeTest: round(idleCpuPercent),
             machineMemoryUsedGbBeforeTest: round(idleMemUsedGb, 2),
+            ...sfuServer,
         };
         return { summary, participants };
     } finally {
@@ -241,17 +268,22 @@ const results = {
     runs: [],
 };
 
-for (const n of SIZES) {
-    console.log(`Running with ${n} participants...`);
-    try {
-        const run = await runSize(n);
-        results.runs.push(run);
-        console.log(JSON.stringify(run.summary, null, 2));
-    } catch (e) {
-        console.log(`  [${n}] FAILED: ${e.message}`);
-        results.runs.push({ summary: { participants: n, error: e.message } });
+// Sizes are interleaved within each repeat, so slow drift on the machine
+// (heat, background apps) affects every size alike.
+for (let repeat = 1; repeat <= REPEAT; repeat++) {
+    for (const n of SIZES) {
+        console.log(`Running with ${n} participants (repeat ${repeat}/${REPEAT})...`);
+        try {
+            const run = await runSize(n);
+            run.summary.repeat = repeat;
+            results.runs.push(run);
+            console.log(JSON.stringify(run.summary, null, 2));
+        } catch (e) {
+            console.log(`  [${n}] FAILED: ${e.message}`);
+            results.runs.push({ summary: { participants: n, repeat, error: e.message } });
+        }
+        await sleep(5000);
     }
-    await sleep(5000);
 }
 
 await mkdir(new URL("./results/", import.meta.url), { recursive: true });

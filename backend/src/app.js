@@ -9,6 +9,7 @@ import { Server } from "socket.io";
 import mongoose from "mongoose";
 import { connectToSocket } from "./controllers/socketManager.js";
 import { startWorkers, sfuAvailable } from "./sfu/workers.js";
+import { sfuStats } from "./sfu/stats.js";
 
 import cors from "cors";
 import userRoutes from "./routes/users.routes.js";
@@ -32,6 +33,11 @@ app.get("/api/v1/health", (_req, res) => {
         database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
         sfu: sfuAvailable() ? "running" : "unavailable",
     });
+});
+
+// Used by loadtest/run.mjs to measure how hard the SFU server works.
+app.get("/api/v1/sfu/stats", async (_req, res) => {
+    res.json(await sfuStats());
 });
 
 const start = async () => {

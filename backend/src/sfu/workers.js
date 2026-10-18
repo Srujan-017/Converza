@@ -32,6 +32,17 @@ export const startWorkers = async () => {
 
 export const sfuAvailable = () => workers.length > 0;
 
+// cpuMs is the total CPU time (milliseconds) all media workers have used
+// since they started; sample it twice to get CPU use over a period.
+export const workerStats = async () => {
+    let cpuMs = 0;
+    for (const worker of workers) {
+        const usage = await worker.getResourceUsage();
+        cpuMs += usage.ru_utime + usage.ru_stime;
+    }
+    return { workers: workers.length, cpuMs };
+};
+
 // Spread rooms across workers (one per CPU core) in turn.
 export const nextWorker = () => {
     const worker = workers[nextWorkerIndex % workers.length];
