@@ -1,5 +1,11 @@
-import dotenv from "dotenv";
-dotenv.config();
+// Must be the first import: ES modules evaluate every import before any of
+// this file's own top-level code runs, so `import dotenv from "dotenv";
+// dotenv.config();` loads .env too late — sfu/config.js (imported below,
+// transitively) reads process.env at its own module-load time and would
+// capture the defaults instead of .env's values. "dotenv/config" has its
+// own side effect (calling config() during its import), so listing it first
+// guarantees .env is loaded before any other import runs.
+import "dotenv/config";
 import express from "express";
 
 import { createServer } from "node:http";
