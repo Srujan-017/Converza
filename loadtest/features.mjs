@@ -173,6 +173,10 @@ try {
     }
 
     if (!QUICK) {
+        const micBefore = await asha.evaluate(() => {
+            const mic = window.localStream.getAudioTracks().find((t) => t.readyState === "live");
+            return mic ? mic.id : null;
+        });
         await clickButton(asha, "Share");
         const spotlight = await waitFor(async () => (await pageText(bala)).includes("Asha is presenting their screen"));
         check("screen share: others switch to the presenter spotlight", !!spotlight);
@@ -181,6 +185,16 @@ try {
             return !!(v && v.srcObject && v.videoWidth > 0);
         }));
         check("screen share: the shared screen is playing for others", !!screenPlaying);
+        // The same microphone track as before sharing, not screen or tab audio.
+        check("screen share: the presenter's own mic stays on",
+            !!micBefore && await asha.evaluate((id) => window.localStream.getAudioTracks()
+                .some((t) => t.id === id && t.readyState === "live"), micBefore));
+        const voiceHeard = await waitFor(() => bala.evaluate(() => {
+            const v = document.querySelector('[class*="spotlightVideo"]');
+            const audio = v && v.srcObject ? v.srcObject.getAudioTracks() : [];
+            return audio.some((t) => t.readyState === "live" && !t.muted);
+        }), 10000);
+        check("screen share: others can still hear the presenter", !!voiceHeard);
         await clickButton(asha, "Stop Share");
         const backToGrid = await waitFor(async () => !(await pageText(bala)).includes("is presenting their screen"));
         check("stop sharing: everyone returns to the normal grid", !!backToGrid);

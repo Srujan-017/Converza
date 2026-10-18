@@ -33,6 +33,14 @@ const peerConfigConnections = {
 let addStreamToConnection = (peerConnection, stream) => {
     if (!peerConnection || !stream) return
     stream.getTracks().forEach((track) => {
+        // A track already being sent (e.g. the mic kept during screen share)
+        // is re-labelled as part of the new stream instead of added twice, so
+        // the other side plays it together with the new video.
+        const existing = peerConnection.getSenders().find((sender) => sender.track === track)
+        if (existing) {
+            if (existing.setStreams) existing.setStreams(stream)
+            return
+        }
         try {
             peerConnection.addTrack(track, stream)
         } catch (e) {
@@ -127,7 +135,8 @@ export default function VideoMeetComponent() {
     let getDislayMedia = () => {
         if (screen) {
             if (navigator.mediaDevices.getDisplayMedia) {
-                navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
+                // Screen video only: the presenter's own mic stays as the call's audio.
+                navigator.mediaDevices.getDisplayMedia({ video: true, audio: false })
                     .then(getDislayMediaSuccess)
                     .then((stream) => { })
                     .catch((e) => console.log(e))
@@ -276,16 +285,21 @@ export default function VideoMeetComponent() {
 
 
     let getDislayMediaSuccess = (stream) => {
-        console.log("HERE")
+        // Keep the presenter's microphone running: only the camera is
+        // replaced by the screen, so others can still hear them talk.
+        const micTracks = window.localStream
+            ? window.localStream.getAudioTracks().filter(track => track.readyState === 'live')
+            : []
         try {
-            window.localStream.getTracks().forEach(track => track.stop())
+            window.localStream.getVideoTracks().forEach(track => track.stop())
         } catch (e) { console.log(e) }
 
-        window.localStream = stream
-        localVideoref.current.srcObject = stream
+        const presentation = new MediaStream([...stream.getVideoTracks(), ...micTracks])
+        window.localStream = presentation
+        localVideoref.current.srcObject = presentation
         // With the SFU, the screen replaces the camera on the same video
         // producer, so others' existing tile simply shows the screen.
-        syncSfuStream(stream)
+        syncSfuStream(presentation)
 
         // Screen sharing has started successfully: tell everyone else in
         // the call so their UI can promote this tile to the full-screen
