@@ -20,6 +20,7 @@ const SIZES = (args.sizes || "2,4,6,8").split(",").map(Number);
 const SETTLE_SECONDS = Number(args.settle || 20);
 const WINDOW_SECONDS = Number(args.window || 15);
 const LABEL = args.label || "run";
+const SHOW_BROWSER = process.argv.includes("--show");
 const CHROME_PATH = process.env.CHROME_PATH || "C:/Program Files/Google/Chrome/Application/chrome.exe";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -167,7 +168,7 @@ const runSize = async (n) => {
 
     const browser = await puppeteer.launch({
         executablePath: CHROME_PATH,
-        headless: true,
+        headless: !SHOW_BROWSER,
         args: [
             "--use-fake-device-for-media-stream",
             "--use-fake-ui-for-media-stream",
